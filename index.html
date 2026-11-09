@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#edf9ff">
+  <meta name="apple-mobile-web-app-title" content="営業の相棒">
+  <meta name="description" content="営業の相棒の入口です。今日の一歩を、次の受注へ。">
+  <title>営業の相棒</title>
+  <link rel="icon" href="./assets/favicon-32.png" type="image/png">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./config.js" defer></script>
+  <script src="./entrance.js" defer></script>
+</head>
+<body>
+  <main class="entrance">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">✓</span> 営業の相棒</div>
+    <section class="welcome" aria-labelledby="heading">
+      <div class="mascot-stage" aria-hidden="true">
+        <div class="halo"></div><span class="spark spark-one">✦</span><span class="spark spark-two">✦</span>
+        <img class="mascot" src="./assets/icon-512.png" width="512" height="512" alt="" fetchpriority="high">
+        <div class="mascot-shadow"></div>
+        <div class="speech">今日も、一緒に。</div>
+      </div>
+      <p class="eyebrow">あなたの仕事に、小さな相棒。</p>
+      <h1 id="heading">今日の一歩を、<br>次の受注へ。</h1>
+      <div class="loading-status" role="status" aria-live="polite" aria-atomic="true">
+        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <p id="status">営業の相棒を開いています</p>
+      </div>
+      <p class="caption" id="caption">もう少しで、お仕事をはじめられます。</p>
+      <a id="open-app" class="open-app" hidden>アプリを開く <span aria-hidden="true">↗</span></a>
+      <noscript><p class="caption">アプリを開くには、ブラウザのJavaScriptを有効にしてください。</p></noscript>
+    </section>
+    <footer>営業・CADの毎日を、もっとスムーズに。</footer>
+  </main>
+</body>
+</html>
