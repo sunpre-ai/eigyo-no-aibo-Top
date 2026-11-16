@@ -5,7 +5,8 @@
   "lang": "ja",
   "start_url": "./",
   "scope": "./",
-  "display": "browser",
+  "display": "standalone",
+  "launch_handler": { "client_mode": "focus-existing" },
   "background_color": "#edf9ff",
   "theme_color": "#edf9ff",
   "icons": [

@@ -1,0 +1,3 @@
+.trial-card{background:#fff;border:1px solid #d5eae3;border-radius:22px;padding:22px 20px;box-shadow:0 12px 36px #315d5010}
+.trial-card p{line-height:1.8;margin:0}.trial-card .caption{margin-top:8px}.trial-label{color:#16844c;font-size:13px;font-weight:700;letter-spacing:.06em}
+.entrance{padding-top:max(30px,env(safe-area-inset-top));padding-bottom:max(22px,env(safe-area-inset-bottom))}
