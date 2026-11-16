@@ -2,17 +2,19 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#edf9ff">
   <meta name="apple-mobile-web-app-title" content="営業の相棒">
-  <meta name="description" content="営業の相棒の入口です。今日の一歩を、次の受注へ。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="営業の相棒の試験画面です。">
   <title>営業の相棒</title>
   <link rel="icon" href="./assets/favicon-32.png" type="image/png">
   <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./style.css">
-  <script src="./config.js" defer></script>
-  <script src="./entrance.js" defer></script>
+  <link rel="stylesheet" href="./trial.css">
+  <script src="./trial.js" defer></script>
 </head>
 <body>
   <main class="entrance">
@@ -25,14 +27,12 @@
         <div class="speech">今日も、一緒に。</div>
       </div>
       <p class="eyebrow">あなたの仕事に、小さな相棒。</p>
-      <h1 id="heading">今日の一歩を、<br>次の受注へ。</h1>
-      <div class="loading-status" role="status" aria-live="polite" aria-atomic="true">
-        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
-        <p id="status">営業の相棒を開いています</p>
+      <h1 id="heading">営業の相棒</h1>
+      <div class="trial-card">
+        <p class="trial-label">アプリの試験画面</p>
+        <p>この画面が開けば、準備は完了です。</p>
+        <p class="caption">ログインと業務データは、まだつながっていません。</p>
       </div>
-      <p class="caption" id="caption">もう少しで、お仕事をはじめられます。</p>
-      <a id="open-app" class="open-app" hidden>アプリを開く <span aria-hidden="true">↗</span></a>
-      <noscript><p class="caption">アプリを開くには、ブラウザのJavaScriptを有効にしてください。</p></noscript>
     </section>
     <footer>営業・CADの毎日を、もっとスムーズに。</footer>
   </main>
