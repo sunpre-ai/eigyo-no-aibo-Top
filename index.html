@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-title" content="営業の相棒">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="description" content="営業の相棒の試験画面です。">
   <title>営業の相棒</title>
   <link rel="icon" href="./assets/favicon-32.png" type="image/png">
@@ -15,6 +16,7 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./trial.css">
   <script src="./trial-config.js" defer></script>
+  <script id="google-identity" src="https://accounts.google.com/gsi/client" async></script>
   <script src="./trial.js" defer></script>
 </head>
 <body>
@@ -36,9 +38,10 @@
       </div>
       <section class="test-panel" aria-labelledby="test-title">
         <h2 id="test-title">通信の試験</h2>
-        <p class="test-hint">試験データは誰でも閲覧・追加できます。実在の名前や案件、個人情報は入力しないでください。</p>
-        <div class="test-actions"><button id="connect" type="button">試験を開始</button><button id="read" type="button" disabled>読み込む</button></div>
-        <p id="status" role="status" aria-live="polite">「試験を開始」を押してください。</p>
+        <p class="test-hint">許可されたGoogleアカウントでログインします。入力は架空のデータに限り、実在の名前や案件、個人情報は入力しないでください。</p>
+        <div id="signin-area"><div id="google-signin"></div><p class="test-hint">Googleログインは初回と有効期限が切れた場合に必要です。</p></div>
+        <div class="test-actions"><button id="read" type="button" disabled>読み込む</button><button id="logout" type="button" disabled>ログアウト</button></div>
+        <p id="status" role="status" aria-live="polite">Googleログインを準備しています。</p>
         <ul id="items" aria-label="架空データの一覧"></ul>
         <form id="write-form"><label for="item-name">架空データを追加</label><input id="item-name" maxlength="80" required disabled placeholder="例：テスト用の予定"><button id="write" type="submit" disabled>追加する</button></form>
         <button id="retry" type="button" hidden>保存結果を確認・再試行</button>

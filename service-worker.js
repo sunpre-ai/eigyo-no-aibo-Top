@@ -1,4 +1,4 @@
-const cacheName = 'aibo-trial-shell-v3';
+const cacheName = 'aibo-trial-shell-v4';
 const shell = ['./', './index.html', './style.css', './trial.css', './trial-config.js', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png'];
 
 self.addEventListener('install', event => {
