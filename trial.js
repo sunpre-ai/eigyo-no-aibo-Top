@@ -4,7 +4,8 @@ if ('serviceWorker' in navigator) {
 }
 
 const byId = id => document.getElementById(id);
-let endpoint = '', token = '', pending = null, busy = false;
+const endpoint = window.PWA_TRIAL_API_URL || '';
+let token = '', pending = null, busy = false;
 const pendingKey = 'aibo-pwa-trial-pending-v1';
 function clearPendingStorage() { try { localStorage.removeItem(pendingKey); } catch { /* 保存情報の消去は次回の確認でも安全に再試行できる。 */ } }
 const setStatus = message => { byId('status').textContent = message; };
@@ -39,7 +40,7 @@ function showItems(items) {
   for (const item of items) { const li = document.createElement('li'); li.textContent = item; list.append(li); }
 }
 function handleFailure(result) {
-  if (result.kind === 'connection') { setStatus('接続できません。試験用URLと通信状態を確認してください。'); return; }
+  if (result.kind === 'connection') { setStatus('接続できません。通信状態を確認してください。'); return; }
   if (result.code === 'SESSION_EXPIRED') { token = ''; setStatus('試験の有効期限が切れました。「試験を開始」を押してください。'); return; }
   setStatus(result.error);
 }
@@ -50,10 +51,8 @@ async function readItems() {
   else handleFailure(result);
 }
 byId('connect').addEventListener('click', async () => {
-  const value = byId('api-url').value.trim();
-  if (!validEndpoint(value)) { setStatus('試験用GASのURLを確認してください。'); return; }
-  if (pending && value !== endpoint) { setStatus('保存結果を確認するまでは、試験用URLを変更できません。'); return; }
-  endpoint = value; token = ''; setBusy(true); setStatus('試験を開始しています…');
+  if (!validEndpoint(endpoint)) { setStatus('試験用の接続先が設定されていません。'); return; }
+  token = ''; setBusy(true); setStatus('試験を開始しています…');
   const result = await request('start');
   if (result.kind === 'success' && typeof result.data.token === 'string' && result.data.token) { token = result.data.token; if (pending) setStatus('試験を再開しました。保存結果を確認してください。'); else await readItems(); }
   else if (result.kind === 'success') setStatus('接続できません。応答を確認できませんでした。');
@@ -66,7 +65,7 @@ async function submitPending() {
   const result = await request('add', pending);
   if (result.kind === 'success' && Array.isArray(result.data.items)) {
     pending = null; clearPendingStorage(); byId('retry').hidden = true; byId('item-name').value = ''; showItems(result.data.items); setStatus('架空データを保存しました。');
-  } else if (result.kind === 'failure' && result.code !== 'SESSION_EXPIRED') {
+  } else if (result.kind === 'failure' && ['INVALID', 'CONFLICT', 'LIMIT', 'BUSY'].includes(result.code)) {
     pending = null; clearPendingStorage(); byId('retry').hidden = true; handleFailure(result);
   } else {
     byId('retry').hidden = false;
@@ -88,8 +87,8 @@ byId('retry').addEventListener('click', () => { if (!busy && token && pending) s
 
 try {
   const saved = JSON.parse(localStorage.getItem(pendingKey) || 'null');
-  if (saved && validEndpoint(saved.endpoint) && typeof saved.pending?.requestId === 'string' && typeof saved.pending?.name === 'string') {
-    endpoint = saved.endpoint; pending = saved.pending; byId('api-url').value = endpoint;
+  if (saved && saved.endpoint === endpoint && validEndpoint(endpoint) && typeof saved.pending?.requestId === 'string' && typeof saved.pending?.name === 'string') {
+    pending = saved.pending;
     byId('retry').hidden = false; setStatus('前回の保存結果を確認します。「試験を開始」を押してください。');
   }
 } catch { /* 端末の保存情報が使えない場合は、新しい試験として開始する。 */ }

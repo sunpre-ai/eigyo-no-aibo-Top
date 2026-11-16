@@ -1,5 +1,5 @@
-const cacheName = 'aibo-trial-shell-v2';
-const shell = ['./', './index.html', './style.css', './trial.css', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png'];
+const cacheName = 'aibo-trial-shell-v3';
+const shell = ['./', './index.html', './style.css', './trial.css', './trial-config.js', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(shell)));

@@ -10,13 +10,12 @@ function fixture(handler, storage = new Map()) {
     return elements.get(id);
   };
   const context = vm.createContext({
-    document: { getElementById: element, createElement: () => ({ textContent: '' }) }, navigator: {}, URL, AbortController, setTimeout, clearTimeout,
+    document: { getElementById: element, createElement: () => ({ textContent: '' }) }, navigator: {}, window: { PWA_TRIAL_API_URL: 'https://script.google.com/macros/s/dummy/exec' }, URL, AbortController, setTimeout, clearTimeout,
     localStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
     crypto: { randomUUID: () => 'a0c0d0e0-1111-4222-8333-444444444444' },
     fetch: async (url, options) => handler(url, options),
   });
   vm.runInContext(fs.readFileSync('trial.js', 'utf8'), context);
-  element('api-url').value = 'https://script.google.com/macros/s/dummy/exec';
   return { element, storage };
 }
 
@@ -54,4 +53,28 @@ test('無効セッションと読めない応答を区別する', async () => {
   const broken = fixture(async () => ({ ok: true, json: async () => { throw Error('JSONではない'); } }));
   await broken.element('connect').listeners.click();
   assert.match(broken.element('status').textContent, /接続できません/);
+});
+
+test('応答が届かないまま再読込しても同じ要求IDで再試行する', async () => {
+  const calls = [], storage = new Map();
+  const handler = async (url, options) => {
+    const body = JSON.parse(options.body); calls.push(body);
+    if (body.action === 'add' && calls.filter(call => call.action === 'add').length === 1) throw Error('応答が届かない');
+    return { ok: true, json: async () => body.action === 'start' ? { ok: true, token: '仮' } : { ok: true, items: [] } };
+  };
+  const first = fixture(handler, storage);
+  await first.element('connect').listeners.click();
+  first.element('item-name').value = '架空データ';
+  first.element('write-form').listeners.submit({ preventDefault() {} });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(storage.size, 1);
+  const reopened = fixture(handler, storage);
+  assert.match(reopened.element('status').textContent, /前回の保存結果/);
+  await reopened.element('connect').listeners.click();
+  await reopened.element('retry').listeners.click();
+  await new Promise(resolve => setImmediate(resolve));
+  const writes = calls.filter(call => call.action === 'add');
+  assert.equal(writes.length, 2);
+  assert.equal(writes[0].requestId, writes[1].requestId);
+  assert.equal(storage.size, 0);
 });
