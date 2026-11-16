@@ -14,6 +14,7 @@
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./trial.css">
+  <script src="./trial-config.js" defer></script>
   <script src="./trial.js" defer></script>
 </head>
 <body>
@@ -30,9 +31,18 @@
       <h1 id="heading">営業の相棒</h1>
       <div class="trial-card">
         <p class="trial-label">アプリの試験画面</p>
-        <p>この画面が開けば、準備は完了です。</p>
-        <p class="caption">ログインと業務データは、まだつながっていません。</p>
+        <p>架空のデータを読み書きします。</p>
+        <p class="caption">この画面では本番のデータを扱いません。</p>
       </div>
+      <section class="test-panel" aria-labelledby="test-title">
+        <h2 id="test-title">通信の試験</h2>
+        <p class="test-hint">試験データは誰でも閲覧・追加できます。実在の名前や案件、個人情報は入力しないでください。</p>
+        <div class="test-actions"><button id="connect" type="button">試験を開始</button><button id="read" type="button" disabled>読み込む</button></div>
+        <p id="status" role="status" aria-live="polite">「試験を開始」を押してください。</p>
+        <ul id="items" aria-label="架空データの一覧"></ul>
+        <form id="write-form"><label for="item-name">架空データを追加</label><input id="item-name" maxlength="80" required disabled placeholder="例：テスト用の予定"><button id="write" type="submit" disabled>追加する</button></form>
+        <button id="retry" type="button" hidden>保存結果を確認・再試行</button>
+      </section>
     </section>
     <footer>営業・CADの毎日を、もっとスムーズに。</footer>
   </main>
