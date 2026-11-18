@@ -32,7 +32,10 @@
   ];
   const views = {
     team: () => page('工程別の進捗・チームの情報', '現行ホームの情報を集める画面の見本です。内容は架空です。', sections.map(([title, body, target]) => panel(title, `<p>${body}</p><a class="button" href="#${target}">内容を見る</a>`)).join('')),
-    questions: () => page('確認依頼・回答', '架空の依頼と回答の見本です。', card('自分の対応待ち 1件', `${sample}：図面の確認をお願いします。`, '内容を見る') + card('相手の確認・回答待ち 1件', `${sampleB}：営業の回答待ちです。`, '内容を見る') + card('✓ 解決済み 1件', '架空の案件：仕様を確認しました。', '内容を見る') + form('確認依頼の回答', '回答内容', '回答を確認')),
+    questions: () => page('確認依頼・回答', '確認依頼と回答は架空の見本です。',
+      panel('自分の対応待ち 1件', `<p><span class="chip chip-today">回答待ち</span> ${sample}</p><p>件名：図面の確認　／　回答期限：11/20</p><p>図面の仕様について確認をお願いします。</p><label class="field">回答内容<textarea rows="3" placeholder="架空の回答"></textarea></label>` + action('回答を確認')) +
+      panel('相手の確認・回答待ち 1件', `<p><span class="chip chip-wait">相手待ち</span> ${sampleB}</p><p>件名：仕様の確認　／　営業の回答待ち</p>` + action('内容を見る')) +
+      panel('✓ 解決済み 1件', '<p>架空の案件：仕様を確認しました。</p>' + action('内容を見る'))),
     notices: () => page('お知らせ', '確認したお知らせは確認済みに移ります。画面は架空の見本です。', card('未読・日程変更', `${sample}：予定日が変更されました。`, '内容を見る') + card('✓ 確認済み', `${sampleB}：確認依頼への回答があります。`, '内容を見る')),
     'cad-month': () => page('CADの月間実績', '架空の集計です。', panel('集計月', input('集計月', 'month', '2026-11') + action('この月を表示')) + card('今月の実績', '完成した案件：3件 ／ 担当した案件：5件', '詳細を見る')),
     'cad-team': () => page('CADチーム', '架空のチーム状況です。', card('チームの進捗', '担当者 A：確認中 2件 ／ 担当者 B：確認中 1件', '一覧を見る')),
