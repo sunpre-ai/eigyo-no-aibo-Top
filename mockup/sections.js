@@ -66,7 +66,9 @@
     performance: () => page('営業の月間成績', '架空の数値を表示しています。',
       panel('集計月', input('集計月', 'month', '2026-11') + action('この月を表示')) +
       panel('今月の状況', '<p>見積：3件　／　受注：2件　／　売上確認：1件</p><p>先月からの引き継ぎを含む架空の集計です。</p>' + action('詳細を見る'))),
-    prospects: () => page('新規開拓', '架空の活動状況です。', card('取引先の状況', '架空の取引先の活動履歴を表示します。', '詳細を見る') + form('活動を記録', '活動内容', '入力内容を確認')),
+    prospects: () => page('新規開拓', '開拓先と活動履歴は架空の見本です。送信・保存されません。',
+      panel('開拓先の登録・進捗更新', '<label class="field">会社名<input placeholder="架空の会社"></label><label class="field">地域<input placeholder="架空の地域"></label>' + select('進捗', ['未接触', '接触中', '商談中', '保留', '初受注', '終了']) + input('最終接触日', 'date') + '<label class="field">次の対応<input placeholder="架空の対応"></label>' + input('次の対応期限', 'date') + '<label class="field">補足<textarea rows="3"></textarea></label>' + action('保存して管理者と共有')) +
+      panel('開拓先の状況', '<p><span class="chip chip-wait">接触中</span> 架空の取引先 A</p><p>最終接触：11/17　／　次の対応：資料を用意する</p>' + action('活動履歴を見る') + ' ' + action('進捗を更新'))),
     schedule: () => page('自分の予定', '打ち合わせ・訪問などの予定を確認する画面の見本です。', card('今日の予定', '10:00　架空の打ち合わせ', '予定を見る') + panel('日時を指定して予定を登録', input('日付', 'date', '2026-11-18') + input('開始時間', 'time', '10:00') + input('終了時間', 'time', '11:00') + '<label class="field">予定の内容<input type="text" placeholder="架空の予定"></label>' + action('入力内容を確認'))),
     settings: () => page('設定', '画面表示とログインの設定画面です。', card('表示する役割', 'プレビューでは CAD の画面を表示しています。', '役割を変更') + card('ログイン', 'この見本では実際の認証を行いません。', 'ログアウト')),
   };
