@@ -36,7 +36,9 @@
       panel('自分の対応待ち 1件', `<p><span class="chip chip-today">回答待ち</span> ${sample}</p><p>件名：図面の確認　／　回答期限：11/20</p><p>図面の仕様について確認をお願いします。</p><label class="field">回答内容<textarea rows="3" placeholder="架空の回答"></textarea></label>` + action('回答を確認')) +
       panel('相手の確認・回答待ち 1件', `<p><span class="chip chip-wait">相手待ち</span> ${sampleB}</p><p>件名：仕様の確認　／　営業の回答待ち</p>` + action('内容を見る')) +
       panel('✓ 解決済み 1件', '<p>架空の案件：仕様を確認しました。</p>' + action('内容を見る'))),
-    notices: () => page('お知らせ', '確認したお知らせは確認済みに移ります。画面は架空の見本です。', card('未読・日程変更', `${sample}：予定日が変更されました。`, '内容を見る') + card('✓ 確認済み', `${sampleB}：確認依頼への回答があります。`, '内容を見る')),
+    notices: () => page('お知らせ', '確認状況は架空の見本です。',
+      panel('未読のお知らせ 1件', `<p><span class="chip chip-today">日程変更</span> ${sample}</p><p>上棟日：12/03 → 12/10</p><p>初回出荷日：11/28 → 12/05</p>` + action('内容を確認した')) +
+      panel('✓ 確認済みのお知らせ 1件', `<p>${sampleB}：確認依頼への回答があります。</p>` + action('内容を見る'))),
     'cad-month': () => page('CADの月間実績', '架空の集計です。', panel('集計月', input('集計月', 'month', '2026-11') + action('この月を表示')) + card('今月の実績', '完成した案件：3件 ／ 担当した案件：5件', '詳細を見る')),
     'cad-team': () => page('CADチーム', '架空のチーム状況です。', card('チームの進捗', '担当者 A：確認中 2件 ／ 担当者 B：確認中 1件', '一覧を見る')),
     quotes: () => page('見積用', '架空の見積一覧です。', card('見積の確認', `${sample}：見積図面を確認中`, '内容を見る')),
