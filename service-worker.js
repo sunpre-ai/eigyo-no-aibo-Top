@@ -1,5 +1,5 @@
 const cacheName = 'aibo-trial-shell-v5';
-const shell = ['./', './index.html', './style.css', './trial.css', './trial-config.js', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png', './css/tokens.css', './mockup/', './mockup/index.html', './mockup/mockup.css', './mockup/mockup.js', './mockup/cases.js', './mockup/aibo-bird.png'];
+const shell = ['./', './index.html', './style.css', './trial.css', './trial-config.js', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png', './css/tokens.css', './mockup/', './mockup/index.html', './mockup/login.html', './mockup/login.css', './mockup/mockup.css', './mockup/mockup.js', './mockup/cases.js', './mockup/aibo-bird.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(shell)));
@@ -14,7 +14,8 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
   if (event.request.mode === 'navigate') {
     const isMockup = new URL(event.request.url).pathname.includes('/mockup/');
-    event.respondWith(fetch(event.request).catch(() => caches.match(isMockup ? './mockup/index.html' : './index.html')));
+    const isLogin = new URL(event.request.url).pathname.endsWith('/mockup/login.html');
+    event.respondWith(fetch(event.request).catch(() => caches.match(isLogin ? './mockup/login.html' : isMockup ? './mockup/index.html' : './index.html')));
     return;
   }
   event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
