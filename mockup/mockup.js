@@ -25,7 +25,7 @@ function nav(active) {
 function workCard(item) { return `<a class="work" href="#detail-${item.id}"><span class="chip chip-${item.state}">${item.badge}</span><strong>${item.title}</strong><p class="work-site">${item.site}</p><p class="sub">${item.due}　›</p></a>`; }
 function tiles() { return [['late','期限超過',1], ['today','本日まで',2], ['waiting','引き継ぎ・回答待ち',1], ['none','期限・担当の確認',0]].map(([type, label, count]) => count ? `<a class="tile ${type}" href="#works?state=${type}"><span>${label}</span><strong>${count}<small>件</small></strong></a>` : `<span class="tile ${type}" aria-disabled="true"><span>${label}</span><strong>${count}<small>件</small></strong></span>`).join(''); }
 function home() {
-  return `<section class="hero"><div><p>11月18日（水）　おはようございます</p><h1>今日の仕事は <strong>4</strong> 件です</h1><p>今日も一緒に進めましょう。</p></div><img src="./aibo-bird.png" alt=""></section>
+  return `<section class="hero"><div><p>11月18日（水）　おはようございます</p><h1>今日の仕事は <strong>4</strong> 件です</h1><p>今日も一緒に進めましょう。</p></div><div class="hero-tools"><a class="hero-notice" href="#notices" aria-label="お知らせ、未読1件">${svg('notices')}<span class="badge">1</span></a><img src="./aibo-bird.png" alt=""></div></section>
     <p class="sync">画面プレビュー：架空データを表示中</p>
     <div class="tiles">${tiles()}</div>
     <a class="strip" href="#team"><span><strong>CADの期限超過・確認待ち</strong><small>期限超過 1件・営業回答・承認待ち等 1件</small></span><span aria-hidden="true">›</span></a>
