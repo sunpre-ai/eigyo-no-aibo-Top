@@ -46,7 +46,9 @@
       panel('CADチーム全体の状況', '<p>担当者 A：担当 2件　／　期限超過 1件　／　確認待ち 1件</p><p>担当者 B：担当 1件　／　期限超過 0件　／　確認待ち 0件</p><a class="button" href="#trouble">CADの困りごとを見る</a>') +
       panel('担当者 A の案件', `<p><span class="chip chip-late">期限超過</span> ${sample}</p><p>期限：11/17　／　見積図面を確認中</p><a class="button" href="#detail-a">内容を見る</a>`) +
       panel('担当者 B の案件', `<p>${sampleB}</p><p>期限：11/18　／　木取表を確認中</p><a class="button" href="#detail-b">内容を見る</a>`)),
-    quotes: () => page('見積用', '架空の見積一覧です。', card('見積の確認', `${sample}：見積図面を確認中`, '内容を見る')),
+    quotes: () => page('見積用', '見積案件と図面入力状況は架空の見本です。',
+      panel('見積案件の進捗', '<p>見積用：1件　／　図面入力待ち：1件</p><label class="field">案件を探す<input type="search" placeholder="受注先・現場名"></label>') +
+      panel('架空の受注先 D', '<p><span class="chip chip-wait">見積中</span> 架空の現場 D</p><p>営業：担当 A　／　CAD：担当 B</p><p>図面入力：確認中　／　回答期限：11/20</p><a class="button" href="#detail-d">内容を見る</a>')),
     cancel: () => page('受注キャンセル', '取消状況の見本です。', card('対応状況', `${sampleB}：内容を確認中`, '内容を見る')),
     prevention: () => page('ミス・再発防止', '架空の共有内容です。', card('共有・確認', '架空の確認事項：仕様を確認してください。', '内容を見る')),
     trouble: () => page('困っていること・対応状況', '架空の相談内容と入力画面です。', panel('選ぶだけで簡単に報告', select('困っていること', ['確認したいこと', '作業が進まない', 'その他']) + select('緊急度', ['通常', '急ぎ', '作業停止']) + select('関連案件（任意）', ['案件に関係しない相談', sample]) + '<label class="field">補足（任意）<textarea rows="3" placeholder="架空の相談内容"></textarea></label>' + action('管理者へ報告')) + card('チームへの相談', '架空の相談内容を表示します。', '内容を見る')),
