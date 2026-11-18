@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>共通部品の見本｜営業の相棒</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/parts.css">
+</head>
+<body>
+  <main class="sample-shell" id="top">
+    <h1 class="sample-heading">営業の相棒 共通部品の見本</h1>
+    <p class="sample-sub">画面の組み立てに使う部品の途中経過です。案件名や件数は架空です。</p>
+    <div class="sample-grid">
+      <section class="surface" aria-labelledby="summary-title">
+        <h2 id="summary-title">件数タイル</h2>
+        <div class="tile-row">
+          <a class="tile late" href="#top"><span>期限超過</span><strong>2<span class="sample-sub">件</span></strong></a>
+          <a class="tile today" href="#top"><span>本日まで</span><strong>1<span class="sample-sub">件</span></strong></a>
+          <a class="tile waiting" href="#top"><span>引き継ぎ・回答待ち</span><strong>3<span class="sample-sub">件</span></strong></a>
+          <a class="tile none" href="#top"><span>期限・担当の確認</span><strong>1<span class="sample-sub">件</span></strong></a>
+        </div>
+      </section>
+      <section class="surface">
+        <h2>状態と連絡</h2>
+        <p><span class="chip chip-late">期限超過</span> <span class="chip chip-today">本日まで</span> <span class="chip chip-wait">相手待ち</span> <span class="chip none">期限未設定</span></p>
+        <p class="band late">CADの期限超過・確認待ちを確認してください</p>
+        <p class="band today">重要連絡：内容の確認をお願いします</p>
+        <button class="button button-primary" type="button">内容を確認する</button>
+      </section>
+      <section class="surface">
+        <h2>仕事カード</h2>
+        <a class="work-card" href="#top"><span class="chip chip-today">本日まで</span><strong>図面の確認</strong><span>架空の受注先・架空の現場</span><br><span class="sample-sub">期限：本日　›</span></a>
+      </section>
+      <section class="surface">
+        <h2>案件カードと工程バー</h2>
+        <a class="work-card" href="#top"><span class="chip chip-wait">回答待ち</span><strong>架空の受注先・架空の現場</strong><span class="sample-sub">上棟日：未確定　／　出荷日：未確定</span><br><span class="sample-sub">構造材のデータを作成中（2/4）</span><span class="progress" aria-label="工程：1件完了、2件目作業中、残り未着手"><span class="done">✓</span><span class="current">●</span><span>—</span><span>—</span></span><span class="sample-sub">次：構造材の確認　›</span></a>
+      </section>
+      <section class="surface">
+        <h2>PCメニュー</h2>
+        <nav class="nav-example" aria-label="PCメニューの見本"><a href="#top" aria-current="page">ホーム</a><a href="#top">案件</a><a href="#top">確認依頼</a><a href="#top">お知らせ</a><a href="#top">そのほか</a></nav>
+      </section>
+      <section class="surface">
+        <h2>同期表示と説明</h2>
+        <p class="band waiting">11:42 時点の内容を表示中・最新を確認しています</p>
+        <details class="help"><summary aria-label="件数の数え方を表示">？ 件数の数え方</summary><p>この文章は部品見本用の仮の説明です。</p></details>
+        <a class="button" href="#top">更新を試す</a>
+      </section>
+      <section class="surface">
+        <h2>スマホのタブバー</h2>
+        <nav class="tab-example" aria-label="スマホのタブバーの見本"><a href="#top" aria-current="page">ホーム</a><a href="#top">案件</a><a href="#top">確認依頼</a><a href="#top">お知らせ</a><a href="#top">その他</a></nav>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
