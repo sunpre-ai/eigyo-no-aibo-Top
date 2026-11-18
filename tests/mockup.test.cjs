@@ -14,6 +14,7 @@ function setup(hash = '#home') {
   const context = vm.createContext({ document, window, location, URLSearchParams, setTimeout() {} });
   vm.runInContext(fs.readFileSync('mockup/mockup.js', 'utf8'), context);
   vm.runInContext(fs.readFileSync('mockup/cases.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('mockup/detail-panels.js', 'utf8'), context);
   vm.runInContext(fs.readFileSync('mockup/sections.js', 'utf8'), context);
   return { elements, listeners, location };
 }
@@ -42,6 +43,16 @@ test('案件の種類と過去物件の表示が切り替わる', () => {
   for (const fn of listeners.click) fn(event);
   assert.ok(elements.get('content').innerHTML.includes('架空の現場 D'));
   assert.ok(!elements.get('content').innerHTML.includes('架空の現場 A'));
+});
+
+test('案件詳細は選択した架空案件の情報を表示する', () => {
+  const { elements } = setup('#detail-b');
+  const html = elements.get('content').innerHTML;
+  assert.ok(html.includes('架空の現場 B'));
+  assert.ok(html.includes('1/15'));
+  assert.ok(!html.includes('架空の現場 A'));
+  assert.ok(html.includes('送信・保存されません'));
+  for (const label of ['引き継ぎメモ', '仮木取表', '特殊材', '在庫確認', '構造計算', '現場下見', '上棟の延期']) assert.ok(html.includes(label), label);
 });
 
 test('未接続の画面は表示見本だと明示する', () => {

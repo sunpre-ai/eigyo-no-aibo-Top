@@ -11,13 +11,15 @@
   ];
   let filter = '受注';
   let past = false;
+  window.previewCaseById = id => cases.find(item => item.id === id);
   function progress(item) {
     const names = ['仕様書', '承認', '構造材', '羽柄・合板'];
     const segments = names.map((name, index) => `<span class="${index < item.progress ? 'done' : index === item.progress && item.progress < 4 ? 'current' : ''}">${index < item.progress ? '✓ ' : index === item.progress && item.progress < 4 ? '● ' : ''}${name}</span>`).join('');
     return `<div class="progress" aria-label="工程 ${item.progress}/4">${segments}</div>`;
   }
   function caseCard(item) {
-    return `<a class="case" href="#detail-${item.id}"><div><span class="chip chip-ok">${item.kind}</span> ${item.newCount ? `<span class="chip chip-wait">更新 ${item.newCount}件</span>` : ''}</div><strong class="case-title">${item.name}　›</strong><div class="dates"><p class="date"><span>上棟日</span><strong>${item.erect}</strong><span>${item.erectState}</span></p><p class="date"><span>初回出荷日</span><strong>${item.ship}</strong><span>${item.shipState}</span></p></div><p class="sub">営業：担当 A ／ CAD：担当 B</p><p>${item.progress === 4 ? '✓ 加工データ完成' : `工程を確認中（${item.progress}/4）`}</p>${progress(item)}<p class="sub">次：案件の内容を確認</p></a>`;
+    const date = (label, value, state) => `<p class="date"><span>${label}</span><strong>${value}</strong><span class="chip ${state === '確定' ? 'chip-ok' : 'chip-today'}">${state}</span></p>`;
+    return `<a class="case" href="#detail-${item.id}"><div><span class="chip chip-ok">${item.kind}</span> ${item.newCount ? `<span class="chip chip-wait">更新 ${item.newCount}件</span>` : ''}</div><strong class="case-title">${item.name}　›</strong><div class="dates">${date('上棟日', item.erect, item.erectState)}${date('初回出荷日', item.ship, item.shipState)}</div><p class="sub">営業：担当 A ／ CAD：担当 B</p><p>${item.progress === 4 ? '✓ 加工データ完成' : `工程を確認中（${item.progress}/4）`}</p>${progress(item)}<p class="sub">次：案件の内容を確認</p></a>`;
   }
   window.casePreview = () => {
     const kinds = ['見積', '受注', '上棟済', '失注'];
