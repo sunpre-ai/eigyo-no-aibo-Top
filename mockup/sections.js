@@ -89,10 +89,23 @@
   document.addEventListener('click', event => {
     const button = event.target.closest('[data-demo]');
     if (!button) return;
-    const toast = document.getElementById('toast');
-    toast.textContent = '画面見本のため、この操作はまだ実行されません。';
-    toast.hidden = false;
-    setTimeout(() => { toast.hidden = true; }, 4000);
+    const dialog = document.getElementById('preview-dialog');
+    const title = document.getElementById('preview-dialog-title');
+    const values = document.getElementById('preview-dialog-values');
+    title.textContent = button.dataset.demo;
+    values.replaceChildren();
+    const panel = button.closest('details') || button.closest('.section-card');
+    if (panel) {
+      panel.querySelectorAll('label.field').forEach(label => {
+        const field = label.querySelector('input, select, textarea');
+        if (!field || !field.value) return;
+        const line = document.createElement('p');
+        const name = label.childNodes[0]?.textContent?.trim() || '入力内容';
+        line.textContent = `${name}：${field.value}`;
+        values.appendChild(line);
+      });
+    }
+    dialog.showModal();
   });
   if (location.hash && window.extraPreview(location.hash.slice(1))) render();
 })();
