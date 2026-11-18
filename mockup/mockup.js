@@ -23,7 +23,7 @@ function nav(active) {
   document.getElementById('tabbar').innerHTML = [...mainNav, ['more', 'その他']].map(([id, label]) => `<a href="#${id}" ${active === id ? 'aria-current="page"' : ''}>${svg(id)}<span>${label}</span></a>`).join('');
 }
 function workCard(item) { return `<a class="work" href="#detail-${item.id}"><span class="chip chip-${item.state}">${item.badge}</span><strong>${item.title}</strong><p class="work-site">${item.site}</p><p class="sub">${item.due}　›</p></a>`; }
-function tiles() { return [['late','期限超過',1], ['today','本日まで',2], ['waiting','引き継ぎ・回答待ち',1], ['none','期限・担当の確認',0]].map(([type, label, count]) => count ? `<a class="tile ${type}" href="#works"><span>${label}</span><strong>${count}<small>件</small></strong></a>` : `<span class="tile ${type}" aria-disabled="true"><span>${label}</span><strong>${count}<small>件</small></strong></span>`).join(''); }
+function tiles() { return [['late','期限超過',1], ['today','本日まで',2], ['waiting','引き継ぎ・回答待ち',1], ['none','期限・担当の確認',0]].map(([type, label, count]) => count ? `<a class="tile ${type}" href="#works?state=${type}"><span>${label}</span><strong>${count}<small>件</small></strong></a>` : `<span class="tile ${type}" aria-disabled="true"><span>${label}</span><strong>${count}<small>件</small></strong></span>`).join(''); }
 function home() {
   return `<section class="hero"><div><p>11月18日（水）　おはようございます</p><h1>今日の仕事は <strong>4</strong> 件です</h1><p>今日も一緒に進めましょう。</p></div><img src="./aibo-bird.png" alt=""></section>
     <p class="sync">画面プレビュー：架空データを表示中</p>
@@ -37,7 +37,12 @@ function render() {
   const active = route(); nav(active);
   if (active === 'home') content.innerHTML = home();
   else if (active === 'cases') content.innerHTML = window.casePreview ? window.casePreview() : empty('案件', 'この画面はまだ作成していません。');
-  else if (active === 'works') content.innerHTML = `<h1 class="page-title">期限の近い仕事</h1><div class="works">${work.map(workCard).join('')}</div>`;
+  else if (active === 'works') {
+    const selected = new URLSearchParams(location.hash.split('?')[1] || '').get('state');
+    const state = selected === 'waiting' ? 'wait' : selected;
+    const visible = state ? work.filter(item => item.state === state) : work;
+    content.innerHTML = `<h1 class="page-title">期限の近い仕事</h1><div class="works">${visible.map(workCard).join('')}</div>`;
+  }
   else if (active === 'team') content.innerHTML = empty('工程別の進捗・チームの情報', 'この画面は、現行の項目を後から組み込む予定です。');
   else if (active === 'more') content.innerHTML = `<section class="empty"><h1>その他</h1><nav class="nav-example" aria-label="その他の画面">${otherNav.map(([id,label]) => `<a class="nav-link" href="#${id}">${svg(id)}${label}</a>`).join('')}</nav></section>`;
   else if (active.startsWith('detail-')) content.innerHTML = empty('案件の詳細', '架空の案件です。詳細画面はまだ作成していません。');

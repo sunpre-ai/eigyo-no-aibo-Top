@@ -11,7 +11,7 @@ function setup(hash = '#home') {
   const add = (name, fn) => { (listeners[name] ||= []).push(fn); };
   const window = { addEventListener: add, scrollTo() {} };
   const document = { getElementById: id => elements.get(id), addEventListener: add };
-  const context = vm.createContext({ document, window, location, setTimeout() {} });
+  const context = vm.createContext({ document, window, location, URLSearchParams, setTimeout() {} });
   vm.runInContext(fs.readFileSync('mockup/mockup.js', 'utf8'), context);
   vm.runInContext(fs.readFileSync('mockup/cases.js', 'utf8'), context);
   return { elements, listeners, location };
@@ -23,6 +23,13 @@ test('ホームに指定された主要区画とプレビュー表示がある',
   for (const label of ['期限超過', '本日まで', '期限の近い仕事', '重要連絡', '工程別の進捗']) assert.ok(html.includes(label));
   assert.ok(html.includes('架空データ'));
   assert.ok(elements.get('sidebar').innerHTML.includes('aria-current="page"'));
+});
+
+test('期限超過タイルから期限超過の仕事だけを表示する', () => {
+  const { elements } = setup('#works?state=late');
+  const html = elements.get('content').innerHTML;
+  assert.ok(html.includes('見積図面を入力する'));
+  assert.ok(!html.includes('木取表を提出する'));
 });
 
 test('案件の種類と過去物件の表示が切り替わる', () => {
