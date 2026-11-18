@@ -20,7 +20,7 @@ function route() { return location.hash.slice(1).split('?')[0] || 'home'; }
 function nav(active) {
   const items = list => list.map(([id, label]) => `<a class="nav-link" href="#${id}" ${active === id ? 'aria-current="page"' : ''}>${svg(id)}<span>${label}</span>${id === 'notices' ? '<b class="badge">1</b>' : ''}</a>`).join('');
   document.getElementById('sidebar').innerHTML = items(mainNav) + '<p class="nav-caption">そのほか</p>' + items(otherNav);
-  document.getElementById('tabbar').innerHTML = [...mainNav, ['more', 'その他']].map(([id, label]) => `<a href="#${id}" ${active === id ? 'aria-current="page"' : ''}>${svg(id)}<span>${label}</span></a>`).join('');
+  document.getElementById('tabbar').innerHTML = [...mainNav, ['more', 'その他']].map(([id, label]) => `<a href="#${id}" ${active === id ? 'aria-current="page"' : ''}><span class="tab-icon">${svg(id)}${id === 'notices' ? '<b class="badge tab-badge">1</b>' : ''}</span><span>${label}</span></a>`).join('');
 }
 function workCard(item) { return `<a class="work" href="#detail-${item.id}"><span class="chip chip-${item.state}">${item.badge}</span><strong>${item.title}</strong><p class="work-site">${item.site}</p><p class="sub">${item.due}　›</p></a>`; }
 function tiles() { return [['late','期限超過',1], ['today','本日まで',2], ['waiting','引き継ぎ・回答待ち',1], ['none','期限・担当の確認',0]].map(([type, label, count]) => count ? `<a class="tile ${type}" href="#works?state=${type}"><span>${label}</span><strong>${count}<small>件</small></strong></a>` : `<span class="tile ${type}" aria-disabled="true"><span>${label}</span><strong>${count}<small>件</small></strong></span>`).join(''); }

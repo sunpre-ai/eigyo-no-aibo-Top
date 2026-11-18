@@ -11,11 +11,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="./mockup.css">
-  <script src="./mockup.js" defer></script>
-  <script src="./cases.js" defer></script>
-  <script src="./sections.js" defer></script>
+  <link rel="stylesheet" href="../css/tokens.css?v=20261118-2">
+  <link rel="stylesheet" href="./mockup.css?v=20261118-2">
+  <script src="./mockup.js?v=20261118-2" defer></script>
+  <script src="./cases.js?v=20261118-2" defer></script>
+  <script src="./detail-panels.js?v=20261118-2" defer></script>
+  <script src="./sections.js?v=20261118-2" defer></script>
 </head>
 <body>
   <header class="topbar"><a class="brand" href="#home">営業の相棒 <span>画面プレビュー</span></a><div class="topbar-actions"><span>サンプル利用者（CAD）</span><a href="#settings">設定</a><a href="#notices">お知らせ <b class="badge">1</b></a></div></header>
@@ -25,5 +26,11 @@
   </div>
   <nav class="tabbar" aria-label="画面" id="tabbar"></nav>
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <dialog class="preview-dialog" id="preview-dialog" aria-labelledby="preview-dialog-title">
+    <h2 id="preview-dialog-title"></h2>
+    <p>これは画面の見本です。入力内容は送信・保存されません。</p>
+    <div id="preview-dialog-values"></div>
+    <form method="dialog"><button class="button" type="submit">閉じる</button></form>
+  </dialog>
 </body>
 </html>

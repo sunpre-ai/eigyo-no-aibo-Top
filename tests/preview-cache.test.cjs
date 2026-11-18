@@ -14,6 +14,11 @@ test('画面見本の静的ファイルだけを保存し、外部APIをキャ�
   handlers.install({ waitUntil: value => { pending = value; } });
   await pending;
   for (const name of ['./mockup/index.html', './mockup/login.html', './mockup/cases.js', './mockup/sections.js']) assert.ok(saved.includes(name));
+  const previewHtml = fs.readFileSync('mockup/index.html', 'utf8');
+  for (const name of ['./css/tokens.css', './mockup/mockup.css', './mockup/mockup.js', './mockup/cases.js', './mockup/sections.js', './mockup/detail-panels.js']) {
+    assert.ok(saved.includes(`${name}?v=20261118-2`));
+    assert.ok(previewHtml.includes(`${name.startsWith('./css/') ? '../css/' + name.slice('./css/'.length) : './' + name.slice('./mockup/'.length)}?v=20261118-2`));
+  }
   assert.ok(saved.every(name => !name.startsWith('https://script.google.com/')));
   let intercepted = false;
   handlers.fetch({ request: { method: 'POST', url: 'https://script.google.com/macros/s/test/exec' }, respondWith: () => { intercepted = true; } });

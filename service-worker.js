@@ -1,5 +1,5 @@
-const cacheName = 'aibo-trial-shell-v5';
-const shell = ['./', './index.html', './style.css', './trial.css', './trial-config.js', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png', './css/tokens.css', './mockup/', './mockup/index.html', './mockup/login.html', './mockup/login.css', './mockup/mockup.css', './mockup/mockup.js', './mockup/cases.js', './mockup/sections.js', './mockup/aibo-bird.png'];
+const cacheName = 'aibo-trial-shell-v6';
+const shell = ['./', './index.html', './style.css', './trial.css', './trial-config.js', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png', './css/tokens.css', './mockup/', './mockup/index.html', './mockup/login.html', './mockup/login.css', './mockup/mockup.css', './mockup/mockup.js', './mockup/cases.js', './mockup/sections.js', './mockup/aibo-bird.png', './css/tokens.css?v=20261118-2', './mockup/mockup.css?v=20261118-2', './mockup/mockup.js?v=20261118-2', './mockup/cases.js?v=20261118-2', './mockup/sections.js?v=20261118-2', './mockup/detail-panels.js?v=20261118-2'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(shell)));

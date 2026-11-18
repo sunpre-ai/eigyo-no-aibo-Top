@@ -27,6 +27,7 @@
   --line: #dbe4df;
   --bg: #edf2ee;
   --surface: #ffffff;
+  --dialog-backdrop: rgba(29, 52, 56, .5);
   --r-card: 20px;
   --r-tile: 18px;
   --r-chip: 999px;
