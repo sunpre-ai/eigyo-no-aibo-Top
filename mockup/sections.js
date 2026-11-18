@@ -73,7 +73,17 @@
     settings: () => page('設定', '画面表示とログインの設定画面です。', card('表示する役割', 'プレビューでは CAD の画面を表示しています。', '役割を変更') + card('ログイン', 'この見本では実際の認証を行いません。', 'ログアウト')),
   };
   window.extraPreview = id => {
-    if (id.startsWith('detail-')) return page('案件の詳細', '架空の案件の見本です。', card('案件の概要', `${sample}：構造材のデータを確認中`, '工程を見る') + card('日程と担当', '上棟日・出荷日・担当者を表示します。', '日程を見る') + card('確認依頼', '架空の確認依頼を表示します。', '確認する'));
+    if (id.startsWith('detail-')) {
+      const project = window.previewCaseById?.(id.slice(7));
+      if (!project) return page('案件の詳細', '対象の架空案件が見つかりません。', '<a class="button" href="#cases">案件一覧へ戻る</a>');
+      return page('案件の詳細', '架空の案件を表示しています。入力内容は送信・保存されません。',
+      panel('案件の概要', `<p>${project.name}</p><p>営業：担当者 A　／　CAD：担当者 B</p><p>上棟日：${project.erect}　／　初回出荷日：${project.ship}</p><p>工程：${project.progress}/4</p><a class="button" href="#cases">案件一覧へ戻る</a>`) +
+      panel('見積図面の入力完了報告', input('入力完了日', 'date') + '<label class="field">営業への連絡<textarea rows="3" placeholder="架空の連絡内容"></textarea></label>' + action('入力完了を報告')) +
+      panel('上棟日・初回出荷日の変更', input('上棟日', 'date') + input('初回出荷日', 'date') + '<label class="field">変更理由<textarea rows="3" placeholder="架空の変更理由"></textarea></label>' + action('変更内容を確認')) +
+      panel('現場確認を CAD へ共有', '<label class="field">現場の配送条件<textarea rows="3" placeholder="架空の配送条件"></textarea></label>' + action('共有内容を確認')) +
+      panel('営業へ確認依頼', '<label class="field">件名<input placeholder="架空の件名"></label><label class="field">確認内容<textarea rows="3" placeholder="架空の確認内容"></textarea></label>' + input('回答期限', 'date') + action('確認依頼を確認')) +
+      card('図面からの確認依頼', '架空の確認依頼の履歴を表示します。', '内容を見る') + (window.detailPreviewPanels?.() || ''));
+    }
     return views[id]?.() || '';
   };
   document.addEventListener('click', event => {
