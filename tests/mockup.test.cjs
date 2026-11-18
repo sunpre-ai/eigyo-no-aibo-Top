@@ -54,3 +54,13 @@ test('工程・チーム画面は主要な区画を表示する', () => {
   const html = elements.get('content').innerHTML;
   for (const label of ['更新ダイジェスト', '出荷に向けた工程', '今日のCAD作業', 'ミス・再発防止', '今日の案件・確認事項']) assert.ok(html.includes(label));
 });
+
+test('主要な各画面が見出しを生成する', () => {
+  const paths = ['#home', '#cases', '#works', '#team', '#questions', '#notices', '#cad-month', '#cad-team', '#quotes', '#cancel', '#prevention', '#trouble', '#daily', '#performance', '#prospects', '#schedule', '#settings', '#more', '#detail-a'];
+  for (const path of paths) {
+    const { elements } = setup(path);
+    const html = elements.get('content').innerHTML;
+    assert.ok(html.includes('<h1'), path);
+    assert.ok(!html.includes('google.script'), path);
+  }
+});
