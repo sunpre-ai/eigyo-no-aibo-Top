@@ -14,6 +14,7 @@ function setup(hash = '#home') {
   const context = vm.createContext({ document, window, location, URLSearchParams, setTimeout() {} });
   vm.runInContext(fs.readFileSync('mockup/mockup.js', 'utf8'), context);
   vm.runInContext(fs.readFileSync('mockup/cases.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('mockup/sections.js', 'utf8'), context);
   return { elements, listeners, location };
 }
 
@@ -43,7 +44,13 @@ test('案件の種類と過去物件の表示が切り替わる', () => {
   assert.ok(!elements.get('content').innerHTML.includes('架空の現場 A'));
 });
 
-test('未実装の画面は完了したように見せない', () => {
+test('未接続の画面は表示見本だと明示する', () => {
   const { elements } = setup('#daily');
-  assert.ok(elements.get('content').innerHTML.includes('まだ作成していません'));
+  assert.ok(elements.get('content').innerHTML.includes('見本'));
+});
+
+test('工程・チーム画面は主要な区画を表示する', () => {
+  const { elements } = setup('#team');
+  const html = elements.get('content').innerHTML;
+  for (const label of ['更新ダイジェスト', '出荷に向けた工程', '今日のCAD作業', 'ミス・再発防止', '今日の案件・確認事項']) assert.ok(html.includes(label));
 });

@@ -1,5 +1,5 @@
 const cacheName = 'aibo-trial-shell-v5';
-const shell = ['./', './index.html', './style.css', './trial.css', './trial-config.js', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png', './css/tokens.css', './mockup/', './mockup/index.html', './mockup/login.html', './mockup/login.css', './mockup/mockup.css', './mockup/mockup.js', './mockup/cases.js', './mockup/aibo-bird.png'];
+const shell = ['./', './index.html', './style.css', './trial.css', './trial-config.js', './trial.js', './manifest.json', './assets/icon-192.png', './assets/icon-512.png', './assets/apple-touch-icon.png', './assets/favicon-32.png', './css/tokens.css', './mockup/', './mockup/index.html', './mockup/login.html', './mockup/login.css', './mockup/mockup.css', './mockup/mockup.js', './mockup/cases.js', './mockup/sections.js', './mockup/aibo-bird.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(shell)));

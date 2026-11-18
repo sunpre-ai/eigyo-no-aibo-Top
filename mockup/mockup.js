@@ -43,7 +43,7 @@ function render() {
     const visible = state ? work.filter(item => item.state === state) : work;
     content.innerHTML = `<h1 class="page-title">期限の近い仕事</h1><div class="works">${visible.map(workCard).join('')}</div>`;
   }
-  else if (active === 'team') content.innerHTML = empty('工程別の進捗・チームの情報', 'この画面は、現行の項目を後から組み込む予定です。');
+  else if (window.extraPreview?.(active)) content.innerHTML = window.extraPreview(active);
   else if (active === 'more') content.innerHTML = `<section class="empty"><h1>その他</h1><nav class="nav-example" aria-label="その他の画面">${otherNav.map(([id,label]) => `<a class="nav-link" href="#${id}">${svg(id)}${label}</a>`).join('')}</nav></section>`;
   else if (active.startsWith('detail-')) content.innerHTML = empty('案件の詳細', '架空の案件です。詳細画面はまだ作成していません。');
   else { const found = [...mainNav, ...otherNav].find(([id]) => id === active); content.innerHTML = empty(found?.[1] || '画面プレビュー', 'この画面はまだ作成していません。'); }
