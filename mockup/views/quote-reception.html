@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; form-action 'none'; base-uri 'none'">
+  <title>見積受付の画面プレビュー</title>
+  <style>html { color-scheme: light dark; } body { margin: 0; }</style>
+</head>
+<body>
+<style>
+#quote-reception-preview{--qr-bg:light-dark(#f6f7ef,#192522);--qr-paper:light-dark(#fff,#23332e);--qr-ink:light-dark(#173e48,#e5eee9);--qr-muted:light-dark(#607677,#acbfb9);--qr-line:light-dark(#d5e0d9,#42554e);--qr-mint:light-dark(#e3f0e9,#283e33);--qr-green:light-dark(#217455,#91d4b0);--qr-button:light-dark(#216e50,#9dd9ba);--qr-button-ink:light-dark(#fff,#163b29);--qr-soft:light-dark(#edf5ef,#30473a);--qr-amber:light-dark(#fff2d6,#4b4026);--qr-amber-ink:light-dark(#7c5915,#f2d78c);font:14px/1.6 "Yu Gothic UI","Meiryo",sans-serif;color:var(--qr-ink);background:var(--qr-bg);border:1px solid var(--qr-line);border-radius:16px;overflow:hidden;position:relative;isolation:isolate}
+#quote-reception-preview *{box-sizing:border-box}
+#quote-reception-preview [hidden]{display:none!important}
+#quote-reception-preview h2,#quote-reception-preview h3,#quote-reception-preview p{margin:0}
+#quote-reception-preview button,#quote-reception-preview input,#quote-reception-preview select,#quote-reception-preview textarea{font:inherit;color:inherit}
+#quote-reception-preview button{touch-action:manipulation}
+#quote-reception-preview .qr-note{font-size:12px;color:var(--qr-muted)}
+#quote-reception-preview .qr-main{min-width:0;padding:22px}
+#quote-reception-preview .qr-titlebar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+#quote-reception-preview .qr-titlebar h2{font-size:24px;font-weight:700}
+#quote-reception-preview .qr-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--qr-line);border-radius:8px;background:var(--qr-paper);padding:9px 13px;white-space:nowrap}
+#quote-reception-preview .qr-action svg{width:16px;height:16px}
+#quote-reception-preview .qr-action.qr-primary{background:var(--qr-button);color:var(--qr-button-ink);border-color:var(--qr-button);font-weight:600}
+#quote-reception-preview .qr-action:hover{filter:brightness(.97)}
+#quote-reception-preview .qr-panel{background:var(--qr-paper);border:1px solid var(--qr-line);border-radius:12px;min-width:0}
+#quote-reception-preview .qr-stack{display:flex;flex-direction:column;gap:18px}
+#quote-reception-preview .qr-sectionhead{padding:16px 17px 13px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+#quote-reception-preview .qr-sectionhead h3{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+#quote-reception-preview .qr-sectionhead h3 svg{width:18px;height:18px}
+#quote-reception-preview .qr-count{color:var(--qr-muted);font-size:12px;font-weight:400}
+#quote-reception-preview .qr-tablewrap{overflow-x:auto}
+#quote-reception-preview table{border-collapse:collapse;width:100%;font-size:13px}
+#quote-reception-preview th{text-align:left;font-size:12px;font-weight:500;background:var(--qr-soft);color:var(--qr-muted);padding:9px 11px;white-space:nowrap}
+#quote-reception-preview td{padding:14px 11px;border-bottom:1px solid var(--qr-line);vertical-align:middle}
+#quote-reception-preview tbody tr:last-child td{border-bottom:0}
+#quote-reception-preview th:first-child,#quote-reception-preview td:first-child{padding-left:17px}
+#quote-reception-preview td:nth-child(2){min-width:170px}
+#quote-reception-preview .qr-date{white-space:nowrap;font-variant-numeric:tabular-nums}
+#quote-reception-preview .qr-project{border:0;padding:0;background:transparent;text-align:left;font-weight:600;color:var(--qr-green);text-decoration:underline;text-decoration-color:var(--qr-line);text-underline-offset:4px}
+#quote-reception-preview .qr-project:hover{text-decoration-color:currentColor}
+#quote-reception-preview .qr-projectsub{display:block;font-size:12px;color:var(--qr-muted);margin-top:2px}
+#quote-reception-preview .qr-state{display:inline-block;font-size:11px;border-radius:5px;padding:3px 6px;white-space:nowrap;background:var(--qr-soft);color:var(--qr-green)}
+#quote-reception-preview .qr-state[data-state="図面入力完了"]{background:var(--qr-amber);color:var(--qr-amber-ink)}
+#quote-reception-preview .qr-state[data-state="すべて完了"]{background:var(--qr-bg);color:var(--qr-muted)}
+#quote-reception-preview select.qr-state{min-width:132px;width:auto;font-size:12px;padding:6px 8px}
+#quote-reception-preview .qr-sync{display:block;font-size:11px;margin-top:5px;color:var(--qr-muted);white-space:nowrap}
+#quote-reception-preview .qr-filelist{overflow-wrap:anywhere;font-size:12px;color:var(--qr-muted);font-weight:400}
+#quote-reception-preview .qr-formpanel{margin-bottom:18px;padding:18px;border-top:3px solid var(--qr-green)}
+#quote-reception-preview .qr-formtitle{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+#quote-reception-preview .qr-formtitle h3{font-size:18px}
+#quote-reception-preview .qr-autofill{background:var(--qr-soft);border-radius:6px;padding:9px 11px;color:var(--qr-muted);font-size:12px;margin-bottom:15px}
+#quote-reception-preview .qr-fields{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px}
+#quote-reception-preview label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500;min-width:0}
+#quote-reception-preview .qr-labeltext{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+#quote-reception-preview .qr-required{font-size:11px;font-weight:400;color:var(--qr-green)}
+#quote-reception-preview .qr-full{grid-column:1/-1}
+#quote-reception-preview input,#quote-reception-preview textarea,#quote-reception-preview select{width:100%;min-width:0;border:1px solid var(--qr-line);border-radius:7px;background:var(--qr-paper);padding:9px 10px;font-size:14px}
+#quote-reception-preview input::placeholder,#quote-reception-preview textarea::placeholder{color:var(--qr-muted);opacity:1}
+#quote-reception-preview details{margin-top:14px}
+#quote-reception-preview summary{color:var(--qr-green);font-size:13px;padding:7px 0}
+#quote-reception-preview details .qr-fields{margin-top:10px}
+#quote-reception-preview .qr-formfooter{display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap;margin-top:17px;padding-top:14px;border-top:1px solid var(--qr-line)}
+#quote-reception-preview .qr-formfooter .qr-note{margin-right:auto}
+#quote-reception-preview .qr-notice{padding:10px 12px;background:var(--qr-soft);border:1px solid var(--qr-line);border-radius:8px;margin-bottom:16px;color:var(--qr-green);font-size:13px}
+#quote-reception-preview .qr-calendarbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:0 17px 13px}
+#quote-reception-preview .qr-range{font-size:14px;font-weight:600;margin-right:auto}
+#quote-reception-preview .qr-segment{display:flex;border:1px solid var(--qr-line);border-radius:6px;overflow:hidden}
+#quote-reception-preview .qr-segment button{padding:5px 11px;background:var(--qr-paper);border:0;font-size:12px}
+#quote-reception-preview .qr-segment button[aria-pressed="true"]{background:var(--qr-green);color:var(--qr-paper)}
+#quote-reception-preview .qr-calendargrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--qr-line)}
+#quote-reception-preview .qr-day{min-width:0;padding:8px 5px 10px;border-right:1px solid var(--qr-line);min-height:146px}
+#quote-reception-preview .qr-day:last-child{border-right:0}
+#quote-reception-preview .qr-day.qr-today{background:var(--qr-soft)}
+#quote-reception-preview .qr-daynum{display:flex;justify-content:center;align-items:center;gap:3px;margin-bottom:8px;font-size:12px;color:var(--qr-muted)}
+#quote-reception-preview .qr-today .qr-daynum{color:var(--qr-green);font-weight:700}
+#quote-reception-preview .qr-event{display:block;width:100%;border:0;border-left:3px solid var(--qr-green);border-radius:3px;background:var(--qr-mint);text-align:left;padding:6px 5px;margin-top:5px;font-size:11px;color:var(--qr-ink);overflow-wrap:anywhere}
+#quote-reception-preview .qr-eventtime{display:block;font-variant-numeric:tabular-nums;color:var(--qr-green);font-weight:600;margin-bottom:2px}
+#quote-reception-preview .qr-calendargrid.qr-month .qr-day{min-height:80px;border-bottom:1px solid var(--qr-line)}
+#quote-reception-preview .qr-weeklabel{text-align:center;padding:6px;color:var(--qr-muted);font-size:11px;border-bottom:1px solid var(--qr-line);background:var(--qr-soft)}
+#quote-reception-preview .qr-eventdetail{padding:10px 17px;border-top:1px solid var(--qr-line);color:var(--qr-muted);font-size:12px;min-height:42px}
+#quote-reception-preview .qr-detail{padding:16px 18px;margin-bottom:18px;border-top:3px solid var(--qr-green)}
+#quote-reception-preview .qr-detail dl{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;margin:16px 0 0;font-size:13px}
+#quote-reception-preview .qr-detail dt{color:var(--qr-muted)}
+#quote-reception-preview .qr-detail dd{margin:0;overflow-wrap:anywhere}
+#quote-reception-preview .qr-bottom{padding:12px 0 0;font-size:11px;color:var(--qr-muted)}
+#quote-reception-preview .qr-caltools{display:flex;gap:8px;flex-wrap:wrap;padding:0 17px 11px}
+#quote-reception-preview .qr-caltools .qr-action{font-size:12px;padding:7px 10px}
+#quote-reception-preview .qr-rules{padding:0 17px 14px;font-size:12px;color:var(--qr-muted)}
+#quote-reception-preview .qr-editor,#quote-reception-preview .qr-draft{margin:0 17px 16px;padding:15px;border:1px solid var(--qr-line);border-radius:9px;background:var(--qr-bg)}
+#quote-reception-preview .qr-edithead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+#quote-reception-preview .qr-edithead h3{font-size:15px}
+#quote-reception-preview .qr-editor .qr-formfooter,#quote-reception-preview .qr-draft .qr-formfooter{margin-top:12px}
+#quote-reception-preview .qr-timefields{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:9px;margin-top:10px}
+#quote-reception-preview .qr-fixed{display:block;font-size:11px;font-weight:600;color:var(--qr-green);margin-top:3px}
+#quote-reception-preview .qr-event[data-fixed="true"]{border-left-width:4px}
+#quote-reception-preview .qr-warning{color:var(--qr-amber-ink);background:var(--qr-amber);font-size:12px;padding:8px 10px;margin-top:10px;border-radius:5px}
+#quote-reception-preview .qr-calnotice{padding:9px 17px;border-top:1px solid var(--qr-line);font-size:12px;color:var(--qr-green);background:var(--qr-soft)}
+#quote-reception-preview .qr-draftrow{display:grid;grid-template-columns:minmax(0,1fr) 145px 140px;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--qr-line);font-size:13px}
+#quote-reception-preview .qr-draftrow input,#quote-reception-preview .qr-draftrow select{font-size:12px;padding:7px}
+#quote-reception-preview .qr-draftrow .qr-warning{grid-column:1/-1;margin:0}
+#quote-reception-preview .qr-planlink{display:block;font-size:11px;border:0;background:transparent;color:var(--qr-green);padding:4px 0 0;text-decoration:underline;text-underline-offset:3px}
+#quote-reception-preview button:disabled{opacity:.5;cursor:default}
+@media(max-width:700px){#quote-reception-preview .qr-draftrow{grid-template-columns:1fr 1fr}#quote-reception-preview .qr-draftrow>div:first-child{grid-column:1/-1}#quote-reception-preview .qr-timefields{grid-template-columns:1fr 1fr}#quote-reception-preview .qr-timefields>label:first-child{grid-column:1/-1}#quote-reception-preview .qr-caltools .qr-action{white-space:normal}#quote-reception-preview .qr-editor,#quote-reception-preview .qr-draft{margin:0 10px 12px;padding:12px}}
+@media(max-width:700px){#quote-reception-preview .qr-main{padding:18px 14px}#quote-reception-preview .qr-top{padding:16px 100px 16px 16px}#quote-reception-preview .qr-preview{margin-left:0}#quote-reception-preview .qr-fields{grid-template-columns:1fr}#quote-reception-preview .qr-titlebar h2{font-size:22px}#quote-reception-preview input,#quote-reception-preview select,#quote-reception-preview textarea{font-size:16px}#quote-reception-preview .qr-calendargrid:not(.qr-month){grid-template-columns:1fr}#quote-reception-preview .qr-calendargrid:not(.qr-month) .qr-day{display:flex;gap:12px;align-items:start;min-height:56px;border-right:0;border-bottom:1px solid var(--qr-line);padding:9px 12px}#quote-reception-preview .qr-calendargrid:not(.qr-month) .qr-daynum{min-width:55px;margin:4px 0}#quote-reception-preview .qr-calendargrid:not(.qr-month) .qr-event{margin-top:0;font-size:12px}#quote-reception-preview .qr-calendargrid:not(.qr-month) .qr-eventtime{display:inline;margin-right:7px}#quote-reception-preview .qr-month .qr-event{font-size:11px;padding:4px 2px}#quote-reception-preview .qr-month .qr-day{padding:6px 2px}#quote-reception-preview .qr-month .qr-daynum{font-size:11px}}
+</style>
+<div id="quote-reception-preview" aria-label="営業の相棒 見積受付の画面案">
+    <main class="qr-main">
+      <div class="qr-titlebar">
+        <button type="button" class="qr-action qr-primary cursor-interaction" id="qr-new"><i data-lucide="plus" aria-hidden="true"></i>新規受付</button>
+      </div>
+      <div id="qr-notice" class="qr-notice" role="status" aria-live="polite" hidden></div>
+      <section class="qr-panel qr-formpanel" id="qr-formpanel" aria-labelledby="qr-formtitle" hidden>
+        <div class="qr-formtitle"><h3 id="qr-formtitle">見積の新規受付</h3><button type="button" class="qr-action cursor-interaction" id="qr-closeform" aria-label="受付を閉じる">閉じる</button></div>
+        <div class="qr-autofill">受付日：2026/11/12　　受付者・営業：営業A（自分）</div>
+        <form id="qr-form">
+          <div class="qr-fields">
+            <label><span class="qr-labeltext">工務店名（受注先名）<span class="qr-required">必須</span></span><input id="qr-company" name="company" required maxlength="100" list="qr-companies" placeholder="工務店名を入力" autocomplete="off"></label>
+            <datalist id="qr-companies"><option value="サンプル工務店"></option><option value="サンプル住建"></option><option value="サンプル建設"></option></datalist>
+            <label><span class="qr-labeltext">現場名<span class="qr-required">必須</span></span><input id="qr-site" name="site" required maxlength="100" placeholder="例：山田様邸" autocomplete="off"></label>
+            <label class="qr-full">プラン番号<input id="qr-plan" name="plan" type="number" min="1" step="1" value="1" required><span class="qr-note">初回はプラン1。再受付はプラン2、プラン3。</span></label>
+            <label>見積提出期限<input id="qr-deadline" name="deadline" type="date"></label>
+            <label>期限の補足<input id="qr-deadline-note" name="deadlineNote" maxlength="80" placeholder="例：午前中／まだ未定"></label>
+            <label class="qr-full">図面<input id="qr-drawings" name="drawings" type="file" multiple><span class="qr-filelist" id="qr-drawingfiles" aria-live="polite">PDF・画像・CADデータなどを選択できます。画面案ではアップロードしません。</span></label>
+          </div>
+          <details><summary class="cursor-interaction">仕様・坪数・担当などを追加する（後からでも可）</summary>
+            <div class="qr-fields">
+              <label>仕様<input name="spec" placeholder="例：在来・2階建て" maxlength="100"></label>
+              <label>坪数<input name="area" type="number" min="0" step="0.01" placeholder="未確定なら空欄"></label>
+              <label>見積CAD担当<select name="cad"><option>未割当</option><option>CAD担当A</option><option>CAD担当B</option></select></label>
+              <label>上棟予定日<input name="raising" type="date"></label>
+              <label class="qr-full">備考<textarea name="notes" rows="2" maxlength="500" placeholder="プラン変更、注意点、まだ決まっていないことなど"></textarea></label>
+            </div>
+          </details>
+          <div class="qr-formfooter"><span class="qr-note">この画面内だけのお試し入力です。</span><button type="button" id="qr-submit" class="qr-action qr-primary cursor-interaction">受付する（お試し）</button></div>
+        </form>
+      </section>
+      <section class="qr-panel qr-detail" id="qr-detail" aria-labelledby="qr-detailtitle" hidden>
+        <div class="qr-formtitle"><h3 id="qr-detailtitle">受付内容</h3><button type="button" id="qr-back" class="qr-action cursor-interaction">一覧に戻る</button></div>
+        <dl id="qr-detailvalues"></dl>
+      </section>
+      <div class="qr-stack" id="qr-stack">
+        <section class="qr-panel" id="qr-list" aria-labelledby="qr-listtitle">
+          <div class="qr-sectionhead"><h3 id="qr-listtitle"><i data-lucide="clipboard-list" aria-hidden="true"></i>見積受付一覧<span class="qr-count" id="qr-count">5件</span></h3><span class="qr-note">営業・事務・CADで共有する想定</span></div>
+          <div class="qr-tablewrap"><table aria-label="見積受付のサンプル一覧"><thead><tr><th scope="col">受付日</th><th scope="col">工務店名・現場名</th><th scope="col">プラン</th><th scope="col">営業 / CAD</th><th scope="col">提出期限</th><th scope="col">進捗状況</th></tr></thead><tbody id="qr-rows"></tbody></table></div>
+        </section>
+        <section class="qr-panel" id="qr-calendar" aria-labelledby="qr-caltitle">
+          <div class="qr-sectionhead"><h3 id="qr-caltitle"><i data-lucide="calendar-days" aria-hidden="true"></i>Google カレンダー</h3><span class="qr-note">接続前・予定は表示例</span></div>
+          <div class="qr-caltools"><button type="button" class="qr-action cursor-interaction" id="qr-addevent">＋ 物件の予定を追加</button><button type="button" class="qr-action qr-primary cursor-interaction" id="qr-autoplan">未配置から予定案を作る</button></div>
+          <div class="qr-rules">手動変更は固定 ／ 自動割り振りは未配置のみ<br>仮設定：このカレンダーで午前9–12時・午後13–17時に各1件、土日と既存予定を除外</div>
+          <section class="qr-editor" id="qr-editor" aria-labelledby="qr-edit-title" hidden>
+            <div class="qr-edithead"><h3 id="qr-edit-title">物件の予定を追加</h3><button type="button" class="qr-action cursor-interaction" id="qr-edit-close">閉じる</button></div>
+            <label id="qr-event-project-label">物件<select id="qr-event-project"></select></label>
+            <p class="qr-note" id="qr-event-origin"></p>
+            <form id="qr-event-form">
+              <div class="qr-timefields"><label>日付<input type="date" id="qr-event-date" required></label><label>開始<input type="time" id="qr-event-start" required></label><label>終了<input type="time" id="qr-event-end" required></label></div>
+              <p class="qr-warning" id="qr-event-warning" role="status" hidden></p>
+              <div class="qr-formfooter"><span class="qr-note" id="qr-locknote">手動で決めた日時は固定されます。</span><button type="button" class="qr-action cursor-interaction" id="qr-unlock" hidden>固定を解除</button><button type="button" class="qr-action cursor-interaction" id="qr-replan" hidden>この予定だけ再配置</button><button type="button" class="qr-action qr-primary cursor-interaction" id="qr-event-save">予定を追加（お試し）</button></div>
+            </form>
+          </section>
+          <section class="qr-draft" id="qr-draft" aria-labelledby="qr-draft-title" hidden>
+            <div class="qr-edithead"><h3 id="qr-draft-title">予定案を確認</h3><span class="qr-note">まだカレンダーには反映していません</span></div>
+            <div id="qr-draftrows"></div><p class="qr-warning" id="qr-draft-warning" role="alert" hidden></p>
+            <div class="qr-formfooter"><button type="button" class="qr-action cursor-interaction" id="qr-discard-plan">取り消す</button><button type="button" class="qr-action qr-primary cursor-interaction" id="qr-apply-plan">予定案を反映（お試し）</button></div>
+          </section>
+          <div class="qr-calendarbar"><span class="qr-range" id="qr-range">2026年11月9日 – 15日</span><div class="qr-segment" aria-label="表示期間"><button type="button" class="cursor-interaction" id="qr-calprev" aria-label="前の期間">‹</button><button type="button" class="cursor-interaction" id="qr-calnext" aria-label="次の期間">›</button></div><div class="qr-segment" aria-label="カレンダーの表示"><button type="button" class="cursor-interaction" data-calview="week" aria-pressed="true">週</button><button type="button" class="cursor-interaction" data-calview="month" aria-pressed="false">月</button></div></div>
+          <div class="qr-calendargrid" id="qr-calendargrid" aria-label="共有カレンダーのサンプル"></div>
+          <div class="qr-calnotice" id="qr-calnotice" aria-live="polite" hidden></div>
+          <div class="qr-eventdetail" id="qr-eventdetail">予定を選ぶと日時を変更できます。Googleカレンダーでの手動変更も固定する想定です。</div>
+        </section>
+      </div>
+      <p class="qr-bottom">Zドライブの受付Excelを使い続ける想定です。この画面案は未接続で、保存・同期・予定登録は行いません。</p>
+    </main>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('quote-reception-preview');
+  const find = (s) => root.querySelector(s);
+  let calendarView = 'week';
+  const samples = [
+    {id:'仮-005',date:'11/12',company:'サンプル工務店',site:'山田様邸',plan:1,sales:'営業A',cad:'未割当',deadline:'2026-11-17',deadlineNote:'午前中',state:'受付済み',notes:'図面の追加資料を確認中',drawings:['山田様邸_平面図.pdf']},
+    {id:'仮-004',date:'11/12',company:'サンプル住建',site:'鈴木様邸',plan:2,sales:'営業B',cad:'CAD担当A',deadline:'2026-11-16',state:'受付済み',spec:'在来・2階建て',area:'32.5'},
+    {id:'仮-003',date:'11/11',company:'サンプル建設',site:'佐藤様邸',plan:3,sales:'営業A',cad:'CAD担当B',deadline:'2026-11-13',state:'図面入力完了',spec:'在来',area:'18'},
+    {id:'仮-002',date:'11/10',company:'サンプル工務店',site:'高橋様邸',plan:1,sales:'営業C',cad:'CAD担当A',deadline:'2026-11-16',state:'図面入力完了'},
+    {id:'仮-001',date:'11/09',company:'サンプル住建',site:'田中様邸',plan:2,sales:'営業B',cad:'CAD担当B',deadline:'2026-11-12',state:'すべて完了'}
+  ];
+  const events = [
+    {id:'予定-1',date:'2026-11-12',time:'09:30',end:'10:00',title:'図面確認',person:'営業A・CAD担当B',fixed:true,origin:'Googleカレンダーで作成（表示例）'},
+    {id:'予定-2',projectId:'仮-002',date:'2026-11-12',time:'13:00',end:'17:00',title:'高橋様邸 / プラン1',person:'CAD担当A',fixed:true,origin:'サイトで手動変更（表示例）'},
+    {id:'予定-3',projectId:'仮-003',date:'2026-11-13',time:'09:00',end:'12:00',title:'佐藤様邸 / プラン3',person:'CAD担当B',fixed:true,origin:'Googleカレンダーで手動変更（表示例）'}
+  ];
+  const demoToday='2026-11-12';
+  let viewDate=demoToday,selectedEventId=null,draftItems=[],nextEventId=4;
+  const iso=(d)=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const asDate=(s)=>new Date(s+'T12:00:00');
+  const addDays=(s,n)=>{const d=asDate(s);d.setDate(d.getDate()+n);return iso(d);};
+  const shortDate=(s)=>Number(s.slice(5,7))+'/'+Number(s.slice(8,10));
+  const projectFor=(event)=>samples.find(p=>p.id===event.projectId);
+  const overlaps=(a,b)=>a.date===b.date&&a.time<b.end&&b.time<a.end;
+  const isLate=(p,e)=>Boolean(p?.deadline&&(e.date>p.deadline||(e.date===p.deadline&&/午前/.test(p.deadlineNote||'')&&e.end>'12:00')));
+  const node = (tag, text, cls) => { const e=document.createElement(tag); if(text!==undefined)e.textContent=text; if(cls)e.className=cls; return e; };
+  function showDetail(record){
+    find('#qr-formpanel').hidden=true;
+    const dl=find('#qr-detailvalues'); dl.replaceChildren();
+    const values=[['受付番号',record.id+'（画面案）'],['工務店名',record.company],['現場名',record.site],['プラン','プラン'+record.plan],['受付日','2026/'+record.date],['営業',record.sales],['見積CAD',record.cad],['提出期限',(record.deadline||'未定')+(record.deadlineNote?' '+record.deadlineNote:'')],['進捗状況',record.state],['図面',(record.drawings||[]).join('、')||'未添付'],['仕様',record.spec||'未入力'],['坪数',record.area?record.area+'坪':'未入力'],['上棟予定日',record.raising||'未定'],['備考',record.notes||'なし']];
+    values.forEach(([k,v])=>dl.append(node('dt',k),node('dd',v)));
+    find('#qr-detail').hidden=false;
+    find('#qr-back').focus({preventScroll:true});
+  }
+  function renderRows(){
+    const rows=find('#qr-rows'); rows.replaceChildren();
+    samples.forEach(record=>{
+      const tr=node('tr'); tr.append(node('td',record.date,'qr-date'));
+      const project=node('td'); const btn=node('button',record.site,'qr-project cursor-interaction'); btn.type='button'; btn.addEventListener('click',()=>showDetail(record)); project.append(btn,node('span',record.company,'qr-projectsub')); tr.append(project);
+      if(record.state!=='すべて完了'){const existing=events.find(e=>e.projectId===record.id);const plan=node('button',existing?'予定を見る':'予定を入れる','qr-planlink cursor-interaction');plan.type='button';plan.addEventListener('click',()=>{const latest=events.find(e=>e.projectId===record.id);openEvent(latest||null,record.id);find('#qr-calendar').scrollIntoView({block:'start',behavior:'auto'});});project.append(plan);}
+      tr.append(node('td','プラン'+record.plan,'qr-date'));
+      const who=node('td',record.sales); who.append(node('span',record.cad,'qr-projectsub')); tr.append(who);
+      const deadline=node('td',record.deadline?Number(record.deadline.slice(5,7))+'/'+Number(record.deadline.slice(8)):'未定','qr-date'); if(record.deadlineNote)deadline.append(node('span',record.deadlineNote,'qr-projectsub')); tr.append(deadline);
+      const status=node('td'); const picker=node('select',undefined,'qr-state cursor-interaction'); picker.setAttribute('aria-label',record.site+'の進捗状況');
+      ['受付済み','図面入力完了','すべて完了'].forEach(state=>{const option=node('option',state);option.value=state;picker.append(option);});picker.value=record.state;picker.dataset.state=record.state;
+      const sync=node('span','Excel：反映待ち（表示例）','qr-sync');sync.hidden=!record.pending;
+      picker.addEventListener('change',()=>{record.state=picker.value;record.pending=true;picker.dataset.state=record.state;sync.hidden=false;find('#qr-notice').textContent='画面案の進捗を「'+record.state+'」に変更しました。Excelへの同期は未接続です。';find('#qr-notice').hidden=false;if(!find('#qr-detail').hidden)showDetail(record);});
+      status.append(picker,sync);tr.append(status);rows.append(tr);
+    }); find('#qr-count').textContent=samples.length+'件';
+  }
+  const weekdays=['月','火','水','木','金','土','日'];
+  function renderCalendar(){
+    const grid=find('#qr-calendargrid'); grid.replaceChildren(); const month=calendarView==='month'; grid.classList.toggle('qr-month',month);
+    const anchor=asDate(viewDate);const first=month?iso(new Date(anchor.getFullYear(),anchor.getMonth(),1,12)):viewDate;
+    const start=addDays(first,-((asDate(first).getDay()+6)%7));
+    find('#qr-range').textContent=month?anchor.getFullYear()+'年'+(anchor.getMonth()+1)+'月':asDate(start).getFullYear()+'年 '+shortDate(start)+' – '+shortDate(addDays(start,6));
+    root.querySelectorAll('[data-calview]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.calview===calendarView)));
+    if(month)weekdays.forEach(d=>grid.append(node('div',d,'qr-weeklabel')));
+    const count=month?42:7;
+    for(let i=0;i<count;i++){
+      const date=addDays(start,i),day=asDate(date);const blank=month&&day.getMonth()!==anchor.getMonth();const cell=node('div',undefined,'qr-day'+(date===demoToday?' qr-today':''));cell.dataset.date=date;
+      if(!blank){
+        cell.append(node('div',month?String(day.getDate()):day.getDate()+' '+weekdays[i],'qr-daynum'));
+        events.filter(e=>e.date===date).sort((a,b)=>a.time.localeCompare(b.time)).forEach(event=>{
+          const b=node('button',undefined,'qr-event cursor-interaction');b.type='button';b.dataset.eventId=event.id;b.dataset.fixed=String(event.fixed);b.setAttribute('aria-label',shortDate(date)+' '+event.time+' '+event.title+(event.fixed?' 固定':''));b.append(node('span',event.time,'qr-eventtime'),node('span',event.title));
+          if(event.fixed)b.append(node('span','固定','qr-fixed'));if(isLate(projectFor(event),event))b.append(node('span','期限を過ぎています','qr-fixed'));
+          b.addEventListener('click',()=>openEvent(event));cell.append(b);
+        });
+      } grid.append(cell);
+    }
+  }
+  function calendarNotice(message){find('#qr-calnotice').textContent=message;find('#qr-calnotice').hidden=false;}
+  function discardDraft(){draftItems=[];find('#qr-draft').hidden=true;}
+  function currentEvent(){return events.find(e=>e.id===selectedEventId);}
+  function updateLockControls(){
+    const event=currentEvent();find('#qr-unlock').hidden=!event?.fixed||!event.projectId;find('#qr-replan').hidden=!event?.projectId;find('#qr-replan').disabled=Boolean(event?.fixed)||projectFor(event||{})?.state==='すべて完了';
+    find('#qr-locknote').textContent=event?.fixed?'固定中：自動割り振りでは動きません。':event?'固定解除済み。再配置を押すまで日時は変わりません。':'手動で決めた日時は固定されます。';
+  }
+  function openEvent(event=null,projectId=''){
+    discardDraft();selectedEventId=event?.id||null;find('#qr-event-project-label').hidden=Boolean(event);const select=find('#qr-event-project');select.replaceChildren();
+    if(!event){samples.filter(p=>p.state!=='すべて完了'&&!events.some(e=>e.projectId===p.id)).forEach(p=>{const o=node('option',p.site+' / プラン'+p.plan);o.value=p.id;select.append(o);});if(!select.options.length){calendarNotice('未配置の物件はありません。既存の予定を選ぶと日時を変更できます。');find('#qr-editor').hidden=true;return;}if(projectId)select.value=projectId;}
+    find('#qr-edit-title').textContent=event?event.title:'物件の予定を追加';find('#qr-event-origin').textContent=event?event.origin:'表示中の受付物件から選択';
+    find('#qr-event-date').value=event?.date||demoToday;find('#qr-event-start').value=event?.time||'09:00';find('#qr-event-end').value=event?.end||'12:00';find('#qr-event-save').textContent=event?'日時を変更して固定（お試し）':'予定を追加して固定（お試し）';
+    find('#qr-editor').hidden=false;updateLockControls();editorWarning();
+  }
+  function editorWarning(){
+    const event=currentEvent(),p=event?projectFor(event):samples.find(p=>p.id===find('#qr-event-project').value);const proposed={date:find('#qr-event-date').value,time:find('#qr-event-start').value,end:find('#qr-event-end').value};const messages=[];
+    if(proposed.time&&proposed.end&&proposed.end<=proposed.time)messages.push('終了は開始より後にしてください。');
+    if(proposed.date&&isLate(p,proposed))messages.push('提出期限 '+shortDate(p.deadline)+(p.deadlineNote?' '+p.deadlineNote:'')+' を過ぎる予定です。日時は自動変更しません。');
+    if(events.some(e=>e.id!==event?.id&&overlaps(proposed,e)))messages.push('既存の予定と時間が重なります。');
+    find('#qr-event-warning').textContent=messages.join(' ');find('#qr-event-warning').hidden=!messages.length;
+  }
+  function saveEvent(){
+    if(!find('#qr-event-form').reportValidity())return;const previous=currentEvent();const p=previous?projectFor(previous):samples.find(p=>p.id===find('#qr-event-project').value);if(!previous&&!p)return;
+    const date=find('#qr-event-date').value,time=find('#qr-event-start').value,end=find('#qr-event-end').value;if(end<=time){editorWarning();return;}
+    if(!previous&&events.some(e=>e.projectId===p.id)){calendarNotice('この物件には既に予定があります。既存の予定を選択してください。');return;}
+    const value={date,time,end,fixed:true,origin:'サイトで手動変更（画面案）'};
+    if(previous)Object.assign(previous,value);else events.push({...value,id:'予定-'+nextEventId++,projectId:p.id,title:p.site+' / プラン'+p.plan,person:p.cad});
+    viewDate=date;discardDraft();find('#qr-editor').hidden=true;renderRows();renderCalendar();calendarNotice('手動で決めた日時を固定しました。自動割り振りでは動かしません。Googleカレンダーは未接続です。');
+  }
+  function nextSlot(occupied,previous=null){
+    for(let day=0;day<60;day++){const date=addDays(demoToday,day),weekday=asDate(date).getDay();if(weekday===0||weekday===6)continue;
+      for(const [time,end] of [['09:00','12:00'],['13:00','17:00']]){const slot={date,time,end};if(previous&&date===previous.date&&time===previous.time)continue;if(!occupied.some(e=>overlaps(slot,e)))return slot;}
+    }return null;
+  }
+  function makePlan(event=null){
+    if(event?.fixed){calendarNotice('この予定は固定中です。固定を解除してから再配置してください。');return;}
+    const source=event?[projectFor(event)].filter(Boolean):samples.filter(p=>p.state!=='すべて完了'&&!events.some(e=>e.projectId===p.id));
+    if(!source.length){discardDraft();calendarNotice('未配置の物件はありません。登録済み・固定中の予定は動かしていません。');return;}
+    const occupied=events.filter(e=>e.id!==event?.id).map(e=>({...e}));draftItems=[];
+    source.sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')).forEach(p=>{const slot=nextSlot(occupied,event);if(slot){const item={...slot,projectId:p.id,replaceId:event?.id||null,manual:false};draftItems.push(item);occupied.push(item);}});
+    find('#qr-editor').hidden=true;if(!draftItems.length){calendarNotice('仮設定の60日内に空きがありません。既存予定は動かしていません。');return;}renderDraft();
+  }
+  function renderDraft(){
+    const container=find('#qr-draftrows');container.replaceChildren();find('#qr-draft-title').textContent=draftItems.some(d=>d.replaceId)?'選んだ予定だけ再配置':'未配置 '+draftItems.length+'件の予定案';find('#qr-draft-warning').hidden=true;
+    draftItems.forEach(item=>{const p=projectFor(item),row=node('div',undefined,'qr-draftrow');const label=node('div',p.site+' / プラン'+p.plan);label.append(node('span',p.deadline?'提出期限 '+shortDate(p.deadline)+(p.deadlineNote?' '+p.deadlineNote:''):'提出期限 未定','qr-projectsub'));row.append(label);
+      const date=node('input');date.type='date';date.value=item.date;date.setAttribute('aria-label',p.site+'の予定日');
+      const slot=node('select');slot.setAttribute('aria-label',p.site+'の時間帯');[['09:00','午前 9–12時'],['13:00','午後 13–17時']].forEach(([v,t])=>{const o=node('option',t);o.value=v;slot.append(o);});slot.value=item.time;
+      const warning=node('div',undefined,'qr-warning');const update=()=>{item.date=date.value;item.time=slot.value;item.end=slot.value==='09:00'?'12:00':'17:00';item.manual=true;warning.textContent=isLate(p,item)?'提出期限を過ぎています。必要に応じて日時を直してください。':'手動調整した予定は固定されます。';warning.hidden=false;find('#qr-draft-warning').hidden=true;};
+      date.addEventListener('change',update);slot.addEventListener('change',update);warning.textContent='提出期限を過ぎる予定です。日時は自動変更しません。';warning.hidden=!isLate(p,item);row.append(date,slot,warning);container.append(row);
+    });find('#qr-draft').hidden=false;
+  }
+  function applyPlan(){
+    const fail=(message)=>{find('#qr-draft-warning').textContent=message;find('#qr-draft-warning').hidden=false;};if(!draftItems.length)return;
+    const replaced=new Set(draftItems.map(d=>d.replaceId).filter(Boolean));const occupied=events.filter(e=>!replaced.has(e.id)).map(e=>({...e}));
+    for(const item of draftItems){const p=projectFor(item),old=events.find(e=>e.id===item.replaceId);
+      if(!item.date||!/^\d{4}-\d{2}-\d{2}$/.test(item.date))return fail('予定日を入力してください。');
+      if(!p||p.state==='すべて完了'||(item.replaceId&&(!old||old.fixed)))return fail('物件や固定状態が変わりました。予定案を作り直してください。');
+      if(!item.replaceId&&events.some(e=>e.projectId===item.projectId))return fail('同じ物件の予定が既にあります。予定案を作り直してください。');
+      if(occupied.some(e=>overlaps(item,e)))return fail('既存予定、または予定案同士の時間が重なっています。日時を直してください。');occupied.push(item);
+    }
+    const count=draftItems.length;viewDate=draftItems[0].date;
+    draftItems.forEach(item=>{const p=projectFor(item),old=events.find(e=>e.id===item.replaceId);const values={date:item.date,time:item.time,end:item.end,fixed:item.manual,origin:item.manual?'予定案を手動調整（画面案）':'自動割り振り（画面案）'};if(old)Object.assign(old,values);else events.push({...values,id:'予定-'+nextEventId++,projectId:p.id,title:p.site+' / プラン'+p.plan,person:p.cad});});
+    discardDraft();renderRows();renderCalendar();calendarNotice(count+'件を画面案に反映しました。対象外の予定は変更していません。Googleカレンダーは未接続です。');
+  }
+  find('#qr-new').addEventListener('click',()=>{find('#qr-detail').hidden=true;find('#qr-notice').hidden=true;find('#qr-formpanel').hidden=false;find('#qr-company').focus({preventScroll:true});});
+  find('#qr-closeform').addEventListener('click',()=>{find('#qr-formpanel').hidden=true;find('#qr-new').focus({preventScroll:true});});
+  find('#qr-back').addEventListener('click',()=>{find('#qr-detail').hidden=true;find('.qr-project').focus({preventScroll:true});});
+  find('#qr-drawings').addEventListener('change',e=>{const names=Array.from(e.target.files).map(file=>file.name);find('#qr-drawingfiles').textContent=names.length?names.join('、')+'（選択のみ・アップロードなし）':'PDF・画像・CADデータなどを選択できます。画面案ではアップロードしません。';});
+  function acceptPreview(){
+    const form=find('#qr-form');if(!form.reportValidity())return;const f=new FormData(form); const company=String(f.get('company')).trim(),site=String(f.get('site')).trim();
+    if(!company||!site){find('#qr-notice').textContent='工務店名と現場名を入力してください。';find('#qr-notice').hidden=false;return;}
+    samples.unshift({id:'仮-'+String(samples.length+1).padStart(3,'0'),date:'11/12',company,site,plan:Number(f.get('plan')),sales:'営業A',cad:String(f.get('cad')),deadline:String(f.get('deadline')),deadlineNote:String(f.get('deadlineNote')),drawings:Array.from(find('#qr-drawings').files).map(file=>file.name),spec:String(f.get('spec')),area:String(f.get('area')),raising:String(f.get('raising')),notes:String(f.get('notes')),state:'受付済み',pending:true});
+    renderRows();form.reset();find('#qr-drawingfiles').textContent='PDF・画像・CADデータなどを選択できます。画面案ではアップロードしません。';find('#qr-formpanel').hidden=true;find('#qr-notice').textContent='「'+site+'」を受付済みとして画面案に追加しました。Excel・図面の保存は未接続です。';find('#qr-notice').hidden=false;find('#qr-new').focus({preventScroll:true});
+  }
+  find('#qr-submit').addEventListener('click',acceptPreview);
+  find('#qr-form').addEventListener('submit',e=>{e.preventDefault();acceptPreview();});
+  find('#qr-form').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&!e.isComposing){e.preventDefault();acceptPreview();}});
+  find('#qr-addevent').addEventListener('click',()=>openEvent());
+  find('#qr-autoplan').addEventListener('click',()=>makePlan());
+  find('#qr-edit-close').addEventListener('click',()=>{find('#qr-editor').hidden=true;});
+  find('#qr-event-save').addEventListener('click',saveEvent);
+  find('#qr-event-form').addEventListener('submit',e=>{e.preventDefault();saveEvent();});
+  find('#qr-event-form').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&!e.isComposing){e.preventDefault();saveEvent();}});
+  ['#qr-event-date','#qr-event-start','#qr-event-end','#qr-event-project'].forEach(s=>find(s).addEventListener('input',editorWarning));
+  find('#qr-unlock').addEventListener('click',()=>{const event=currentEvent();if(!event)return;event.fixed=false;updateLockControls();renderCalendar();calendarNotice('固定を解除しました。日時はまだ変えていません。「この予定だけ再配置」で予定案を確認できます。');});
+  find('#qr-replan').addEventListener('click',()=>{const event=currentEvent();if(event)makePlan(event);});
+  find('#qr-apply-plan').addEventListener('click',applyPlan);
+  find('#qr-discard-plan').addEventListener('click',()=>{discardDraft();calendarNotice('予定案を取り消しました。カレンダーの日時は変えていません。');});
+  function shiftCalendar(direction){const d=asDate(viewDate);if(calendarView==='month'){d.setDate(1);d.setMonth(d.getMonth()+direction);viewDate=iso(d);}else viewDate=addDays(viewDate,7*direction);renderCalendar();}
+  find('#qr-calprev').addEventListener('click',()=>shiftCalendar(-1));
+  find('#qr-calnext').addEventListener('click',()=>shiftCalendar(1));
+  root.querySelectorAll('[data-calview]').forEach(b=>b.addEventListener('click',()=>{calendarView=b.dataset.calview;renderCalendar();}));
+  renderRows();
+  renderCalendar();
+
+  if (window.parent !== window) {
+    new ResizeObserver(() => {
+      window.parent.postMessage({
+        type: 'quote-reception-preview:resize',
+        height: Math.ceil(root.getBoundingClientRect().height),
+      }, '*');
+    }).observe(root);
+  }
+})();
+</script>
+</body>
+</html>
