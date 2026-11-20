@@ -20,13 +20,17 @@ test('画面見本の静的ファイルだけを保存し、外部APIをキャ�
     assert.ok(previewHtml.includes(`${name.startsWith('./css/') ? '../css/' + name.slice('./css/'.length) : './' + name.slice('./mockup/'.length)}?v=20261118-3`));
   }
   for (const name of fs.readdirSync('mockup/views').filter(name => name.endsWith('.js'))) {
-    assert.ok(previewHtml.includes(`./views/${name}?v=20261118-3`));
-    assert.ok(saved.includes(`./mockup/views/${name}?v=20261118-3`));
+    const version = name === 'quotes.js' ? '20261120-1' : '20261118-3';
+    assert.ok(previewHtml.includes(`./views/${name}?v=${version}`));
+    assert.ok(saved.includes(`./mockup/views/${name}?v=${version}`));
   }
+  assert.ok(saved.includes('./mockup/views/quote-reception.html?v=20261120-1'));
   assert.ok(saved.every(name => !name.startsWith('https://script.google.com/')));
   let intercepted = false;
   handlers.fetch({ request: { method: 'POST', url: 'https://script.google.com/macros/s/test/exec' }, respondWith: () => { intercepted = true; } });
   assert.equal(intercepted, false);
   handlers.fetch({ request: { method: 'GET', mode: 'navigate', url: 'https://example.test/eigyo-no-aibo-Top/mockup/login.html' }, respondWith: value => { pending = value; } });
   assert.equal(await pending, './mockup/login.html');
+  handlers.fetch({ request: { method: 'GET', mode: 'navigate', url: 'https://example.test/eigyo-no-aibo-Top/mockup/views/quote-reception.html?v=20261120-1' }, respondWith: value => { pending = value; } });
+  assert.equal(await pending, './mockup/views/quote-reception.html?v=20261120-1');
 });
