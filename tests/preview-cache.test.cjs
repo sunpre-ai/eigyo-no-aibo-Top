@@ -7,7 +7,7 @@ test('画面見本の静的ファイルだけを保存し、外部APIをキャ�
   const handlers = {};
   let saved = [];
   const cache = { addAll: async entries => { saved = [...entries]; } };
-  const self = { location: { origin: 'https://example.test' }, addEventListener: (name, fn) => { handlers[name] = fn; } };
+  const self = { location: { origin: 'https://example.test', href: 'https://example.test/eigyo-no-aibo-Top/service-worker.js' }, addEventListener: (name, fn) => { handlers[name] = fn; } };
   const caches = { open: async () => cache, keys: async () => [], match: async key => key };
   vm.runInNewContext(fs.readFileSync('service-worker.js', 'utf8'), { self, caches, URL, fetch: async () => { throw Error('offline'); } });
   let pending;
@@ -36,4 +36,8 @@ test('画面見本の静的ファイルだけを保存し、外部APIをキャ�
   assert.equal(await pending, './mockup/views/quote-reception.html?v=20261120-1');
   handlers.fetch({ request: { method: 'GET', mode: 'navigate', url: 'https://example.test/eigyo-no-aibo-Top/integration-trial/' }, respondWith: value => { pending = value; } });
   assert.equal(await pending, './integration-trial/index.html');
+  for (const suffix of ['app', 'app/', 'app/index.html']) {
+    handlers.fetch({ request: { method: 'GET', mode: 'navigate', url: `https://example.test/eigyo-no-aibo-Top/${suffix}` }, respondWith: () => { intercepted = true; } });
+    assert.equal(intercepted, false);
+  }
 });
