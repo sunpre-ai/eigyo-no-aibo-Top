@@ -17,8 +17,10 @@ export function createPwaSession({ apiUrl, clientId, fetchImpl = fetch, now = Da
   } catch {
     throw new PwaSessionError('NOT_CONFIGURED');
   }
+  const isAppsScript = endpoint.hostname === 'script.google.com' && !endpoint.port &&
+      /^\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(endpoint.pathname);
   if (endpoint.protocol !== 'https:' || endpoint.username || endpoint.password ||
-      endpoint.search || endpoint.hash || !endpoint.pathname.endsWith('/api/v2') ||
+      endpoint.search || endpoint.hash || (!isAppsScript && !endpoint.pathname.endsWith('/api/v2')) ||
       typeof clientId !== 'string' || !/^[A-Za-z0-9-]+\.apps\.googleusercontent\.com$/.test(clientId)) {
     throw new PwaSessionError('NOT_CONFIGURED');
   }
