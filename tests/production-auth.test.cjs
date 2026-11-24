@@ -2,12 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const endpoint = 'https://api.example.test/api/v2';
+const appsScriptEndpoint = 'https://script.google.com/macros/s/AKfycb-example_123/exec';
 const clientId = 'sample.apps.googleusercontent.com';
 const nonce = 'n'.repeat(48);
 const token = 's'.repeat(50);
 const ok = fields => Response.json({ version: 2, ok: true, ...fields });
 
-async function fixture() {
+async function fixture(apiUrl = endpoint) {
   const { createPwaSession } = await import('../production-auth/session.mjs');
   const calls = [];
   const outcomes = [];
@@ -22,7 +23,7 @@ async function fixture() {
     initialize(options) { this.options = options; },
     renderButton(target) { this.target = target; },
   };
-  const api = createPwaSession({ apiUrl: endpoint, clientId, now: () => config.now, fetchImpl: async (url, options) => {
+  const api = createPwaSession({ apiUrl, clientId, now: () => config.now, fetchImpl: async (url, options) => {
     const body = JSON.parse(options.body);
     calls.push({ url, options, body });
     return handlers[body.action](body);
@@ -38,10 +39,19 @@ async function fixture() {
 test('本番API接続先は明示設定を必要とし、試験用・HTTP・URL認証情報へは接続しない', async () => {
   const { createPwaSession } = await fixture();
   for (const apiUrl of [undefined, 'http://example.test/api/v2', 'https://a:b@example.test/api/v2',
-    endpoint + '?test=1', endpoint.replace('/v2', '/v1')]) {
+    endpoint + '?test=1', endpoint.replace('/v2', '/v1'), appsScriptEndpoint.replace('script.google.com', 'example.test'),
+    appsScriptEndpoint.replace('/exec', '/dev'), appsScriptEndpoint + '?test=1']) {
     assert.throws(() => createPwaSession({ apiUrl, clientId }), { code: 'NOT_CONFIGURED' });
   }
   assert.throws(() => createPwaSession({ apiUrl: endpoint }), { code: 'NOT_CONFIGURED' });
+});
+
+test('専用GASの /exec へAPIの版をPOSTし、Googleログインボタンを初期化する', async () => {
+  const f = await fixture(appsScriptEndpoint);
+  await f.render();
+  assert.equal(f.identity.options.nonce, nonce);
+  assert.equal(f.calls[0].url, appsScriptEndpoint);
+  assert.deepEqual(f.calls[0].body, { version: 2, action: 'loginChallenge' });
 });
 
 test('発行されたnonceでGoogleボタンを初期化し、IDトークンとセッションを別の用途に使う', async () => {
