@@ -11,15 +11,16 @@ function fixture({ saved = true, response = { ok: true, user: { name: '架空の
   }
   for (const id of ['status', 'refresh', 'profile', 'cases']) elements.set(id, element());
   let requested = null;
+  let nextResponse = response;
   const context = vm.createContext({
     window: { PWA_TRIAL_API_URL: endpoint },
     document: { getElementById: id => elements.get(id), createElement: () => element() },
     localStorage: { getItem: () => saved ? JSON.stringify({ endpoint, token: 'test-token', expires: Date.now() + 60000 }) : null },
     URL, AbortController, setTimeout, clearTimeout,
-    fetch: async (url, options) => { requested = { url, options }; if (response instanceof Error) throw response; return { ok: true, json: async () => response }; },
+    fetch: async (url, options) => { requested = { url, options }; if (nextResponse instanceof Error) throw nextResponse; return { ok: true, json: async () => nextResponse }; },
   });
   vm.runInContext(fs.readFileSync('integration-trial/dashboard.js', 'utf8'), context);
-  return { elements, request: () => requested };
+  return { elements, request: () => requested, respond: value => { nextResponse = value; }, refresh: () => elements.get('refresh').handler() };
 }
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
@@ -45,4 +46,16 @@ test('権限拒否、設定不足、通信失敗を分け、古い画面を残�
     assert.match(f.elements.get('status').textContent, message);
     assert.equal(f.elements.get('cases').children.length, 0);
   }
+});
+
+test('再取得に失敗しても取得済み案件を前回情報として明示する', async () => {
+  const f = fixture(); await settle();
+  f.respond(new Error('offline'));
+  await f.refresh();
+  assert.equal(f.elements.get('cases').children.length, 1);
+  assert.match(f.elements.get('status').textContent, /前回の情報を表示中.*接続できません/);
+  f.respond({ ok: false, code: 'FORBIDDEN' });
+  await f.refresh();
+  assert.equal(f.elements.get('cases').children.length, 0);
+  assert.match(f.elements.get('profile').textContent, /未取得/);
 });

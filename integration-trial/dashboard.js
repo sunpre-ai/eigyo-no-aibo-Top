@@ -7,6 +7,14 @@
   const profile = document.getElementById('profile');
   const cases = document.getElementById('cases');
   let busy = false;
+  let lastLoadedAt = null;
+
+  function loadedTime() {
+    return new Intl.DateTimeFormat('ja-JP', { hour: '2-digit', minute: '2-digit' }).format(lastLoadedAt);
+  }
+  function stale(message) {
+    status.textContent = lastLoadedAt ? `前回の情報を表示中（${loadedTime()}取得）。${message}` : message;
+  }
 
   function validEndpoint(value) {
     try {
@@ -23,6 +31,7 @@
   function clearView() {
     profile.textContent = '未取得';
     cases.replaceChildren();
+    lastLoadedAt = null;
   }
   function show(data) {
     if (!data.user || typeof data.user.name !== 'string' || !Array.isArray(data.user.roles) || !Array.isArray(data.cases)) throw new Error('invalid');
@@ -44,19 +53,20 @@
       card.append(title, detail);
       cases.append(card);
     }
-    status.textContent = '試験シートのデータを読み込みました。';
+    lastLoadedAt = new Date();
+    status.textContent = `最新情報を取得しました（${loadedTime()}）。`;
   }
   async function load() {
     if (busy) return;
-    clearView();
     const current = session();
     if (!validEndpoint(endpoint) || !current) {
+      clearView();
       status.textContent = '試験用ログインが必要です。試験用ログイン画面からログインしてください。';
       return;
     }
     busy = true;
     refresh.disabled = true;
-    status.textContent = '試験データを読み込んでいます。';
+    stale('最新情報を取得中です。');
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 20000);
     try {
@@ -65,13 +75,18 @@
       const data = await response.json();
       if (!data || typeof data.ok !== 'boolean') throw new Error('invalid');
       if (data.ok) show(data);
-      else if (data.code === 'SESSION_EXPIRED') status.textContent = 'ログインの有効期限が切れました。試験用ログインからやり直してください。';
-      else if (data.code === 'FORBIDDEN') status.textContent = '試験用の利用者設定に登録されていません。';
-      else if (data.code === 'NOT_CONFIGURED') status.textContent = '試験用シートの設定が完了していません。';
-      else status.textContent = '試験データを取得できませんでした。';
+      else if (data.code === 'SESSION_EXPIRED') {
+        clearView();
+        status.textContent = 'ログインの有効期限が切れました。試験用ログインからやり直してください。';
+      } else if (data.code === 'FORBIDDEN') {
+        clearView();
+        status.textContent = '試験用の利用者設定に登録されていません。';
+      } else if (data.code === 'NOT_CONFIGURED') {
+        clearView();
+        status.textContent = '試験用シートの設定が完了していません。';
+      } else stale('試験データを取得できませんでした。');
     } catch {
-      clearView();
-      status.textContent = '接続できません。通信を確認して、もう一度お試しください。';
+      stale('接続できません。通信を確認して、もう一度お試しください。');
     } finally {
       clearTimeout(timer);
       refresh.disabled = false;
