@@ -14,6 +14,7 @@ test('画面見本の静的ファイルだけを保存し、外部APIをキャ�
   handlers.install({ waitUntil: value => { pending = value; } });
   await pending;
   for (const name of ['./mockup/index.html', './mockup/login.html', './mockup/cases.js', './mockup/sections.js']) assert.ok(saved.includes(name));
+  for (const name of ['./integration-trial/index.html', './integration-trial/dashboard.js']) assert.ok(saved.includes(name));
   const previewHtml = fs.readFileSync('mockup/index.html', 'utf8');
   for (const name of ['./css/tokens.css', './mockup/mockup.css', './mockup/mockup.js', './mockup/cases.js', './mockup/sections.js', './mockup/detail-panels.js']) {
     assert.ok(saved.includes(`${name}?v=20261118-3`));
@@ -33,4 +34,6 @@ test('画面見本の静的ファイルだけを保存し、外部APIをキャ�
   assert.equal(await pending, './mockup/login.html');
   handlers.fetch({ request: { method: 'GET', mode: 'navigate', url: 'https://example.test/eigyo-no-aibo-Top/mockup/views/quote-reception.html?v=20261120-1' }, respondWith: value => { pending = value; } });
   assert.equal(await pending, './mockup/views/quote-reception.html?v=20261120-1');
+  handlers.fetch({ request: { method: 'GET', mode: 'navigate', url: 'https://example.test/eigyo-no-aibo-Top/integration-trial/' }, respondWith: value => { pending = value; } });
+  assert.equal(await pending, './integration-trial/index.html');
 });
