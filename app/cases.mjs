@@ -12,6 +12,11 @@ const bucket = byId('bucket');
 const cards = byId('cards');
 const counts = byId('counts');
 const refresh = byId('refresh');
+const search = byId('search');
+const initialLoading = byId('initial-loading');
+const logout = byId('logout');
+const normalizeSearch = value => String(value ?? '').normalize('NFKC').toLocaleLowerCase('ja');
+
 const messages = {
   SESSION_EXPIRED: 'ログインの有効期限が切れました。ログインし直してください。',
   LOGIN_EXPIRED: 'ログインの有効期限が切れました。ログインし直してください。',
@@ -36,8 +41,14 @@ function display() {
   if (!latest) return;
   const model = caseView(latest.cases, latest.today, past.checked, bucket.value);
   counts.textContent = Object.entries(model.counts).map(([name, count]) => `${name} ${count}件`).join(' ／ ');
+  const terms = normalizeSearch(search.value).trim().split(/\s+/u).filter(Boolean);
+  const items = model.items.filter(item => {
+    const searchable = normalizeSearch([item.customer, item.site, item.receiptNumber].join(' '));
+    return terms.every(term => searchable.includes(term));
+  });
+  if (terms.length) counts.textContent += ` ／ 検索結果 ${items.length}件`;
   cards.replaceChildren();
-  for (const item of model.items) {
+  for (const item of items) {
     const card = document.createElement('article');
     card.className = 'panel section-card';
     card.append(text('h3', `${item.customer} ／ ${item.site}`));
@@ -47,12 +58,15 @@ function display() {
     if (detail.length) card.append(text('p', detail.join(' ／ ')));
     cards.append(card);
   }
-  if (!model.items.length) cards.append(text('p', '該当する案件はありません。'));
+  if (!items.length) cards.append(text('p', '該当する案件はありません。'));
 }
 
 function clearDashboard() {
   clearTimeout(expiryTimer);
   latest = null;
+  search.value = '';
+  initialLoading.hidden = true;
+  logout.hidden = true;
   counts.textContent = '';
   cards.replaceChildren();
   dashboard.hidden = true;
@@ -64,6 +78,8 @@ function clearDashboard() {
 async function load() {
   if (refresh.disabled) return;
   refresh.disabled = true;
+  refresh.textContent = '取得中…';
+  initialLoading.hidden = !!latest;
   status.textContent = latest ? '前回の情報を表示中。最新情報を取得しています。' : '最新情報を取得しています。';
   try {
     const result = await api.cases('CAD');
@@ -80,6 +96,8 @@ async function load() {
     } else status.textContent = latest ? '前回の情報を表示中。' + message : message;
   } finally {
     refresh.disabled = false;
+    refresh.textContent = '最新情報を取得';
+    initialLoading.hidden = true;
   }
 }
 
@@ -115,6 +133,7 @@ async function signIn() {
       }
       login.hidden = true;
       dashboard.hidden = false;
+      logout.hidden = false;
       expiryTimer = setTimeout(() => {
         clearDashboard();
         status.textContent = messages.SESSION_EXPIRED;
@@ -131,8 +150,9 @@ async function signIn() {
 byId('filters').addEventListener('submit', event => { event.preventDefault(); void load(); });
 bucket.addEventListener('change', display);
 past.addEventListener('change', display);
+search.addEventListener('input', display);
 retry.addEventListener('click', signIn);
-byId('logout').addEventListener('click', async () => {
+logout.addEventListener('click', async () => {
   clearDashboard();
   status.textContent = 'ログアウトしています。';
   retry.hidden = true;
