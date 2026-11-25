@@ -2,6 +2,7 @@
 (() => {
   const config = window.AIBO_PWA_CONFIG;
   const reads = new Set(config.readMethods);
+  const savedDevice = config.mode === 'production' ? window.aiboRememberedDevice : null;
   const productionRead = config.mode === 'preview' &&
     new URLSearchParams(location.search).get('mode') === 'production-read';
   const liveMethods = new Set([
@@ -238,8 +239,35 @@
     try { sessionStorage.removeItem(key); } catch (_) { /* メモリ内の記録は削除済み。 */ }
   }
 
+  async function resumeDevice(device) {
+    const challenge = await call({ action: 'deviceChallenge', deviceId: device.id });
+    const signature = await savedDevice.sign(device, challenge.nonce);
+    return call({
+      action: 'resumeDevice', deviceId: device.id, nonce: challenge.nonce,
+      modulus: device.modulus, signature,
+    });
+  }
+
   async function invoke(method, args) {
     const [supplied, ...parameters] = args;
+    if (method === 'logout' && savedDevice) {
+      try {
+        let active = supplied === token() ? supplied : '';
+        const device = !active && await savedDevice.load().catch(() => null);
+        if (device && device.expiresAt > Date.now()) active = (await resumeDevice(device)).token;
+        if (active) await call({ action: 'logout', token: active });
+      } catch (error) {
+        if (error.code !== 'SESSION_EXPIRED') {
+          await savedDevice.clear().catch(() => {});
+          remember(null);
+          window.dispatchEvent(new Event('aibo-session-expired'));
+          throw Error('このブラウザのログインを解除しました。通信エラーのためサーバーの解除結果は未確認です。');
+        }
+      }
+      await savedDevice.clear().catch(() => {});
+      remember(null);
+      return true;
+    }
     if (!supplied || supplied !== token()) {
       window.dispatchEvent(new Event('aibo-session-expired'));
       throw errorFor('SESSION_EXPIRED');
@@ -338,13 +366,34 @@
       }
       return;
     }
+    const device = savedDevice && await savedDevice.load().catch(() => null);
+    if (device) {
+      if (device.expiresAt > Date.now()) {
+        try {
+          await complete(await resumeDevice(device));
+          return;
+        } catch (error) {
+          if (!['SESSION_EXPIRED', 'INVALID', 'FORBIDDEN'].includes(error.code) && error.code) {
+            onError(error.message);
+            return;
+          }
+        }
+      }
+      await savedDevice.clear().catch(() => {});
+    }
     try {
       const identity = await loadGoogle();
       const challenge = await call({ action: 'loginChallenge' });
       identity.initialize({ client_id: config.clientId, nonce: challenge.nonce, auto_select: false,
         callback: async response => {
           try {
-            const result = await call({ action: 'login', credential: response.credential, nonce: challenge.nonce });
+            const keys = savedDevice && await savedDevice.create().catch(() => null);
+            const result = await call({
+              action: 'login', credential: response.credential, nonce: challenge.nonce,
+              ...(keys ? { deviceModulus: keys.modulus } : {}),
+            });
+            if (keys && result.device)
+              await savedDevice.save({ ...result.device, ...keys }).catch(() => {});
             await complete(result);
           } catch (error) { onError(error.message); }
         },

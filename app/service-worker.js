@@ -1,6 +1,6 @@
 const prefix = 'aibo-pwa-workflow:' + new URL(self.registration.scope).pathname + ':';
-const cacheName = prefix + "9b3d4e6b4d379a3a";
-const assets = ["./index.html","./operations.js","./configuration.js","./manifest.json","./icon-192.png","./icon-512.png"];
+const cacheName = prefix + "d950cbdef460d6c0";
+const assets = ["./index.html","./operations.js","./remembered-device.js","./configuration.js","./manifest.json","./icon-192.png","./icon-512.png"];
 const shell = new Set(assets.map(file => new URL(file, self.registration.scope).href));
 
 self.addEventListener('install', event => {
