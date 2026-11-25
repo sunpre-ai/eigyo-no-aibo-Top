@@ -1,5 +1,5 @@
 const prefix = 'aibo-pwa-workflow:' + new URL(self.registration.scope).pathname + ':';
-const cacheName = prefix + "cd130aa3e61f5029";
+const cacheName = prefix + "44d4f5e95aa06579";
 const assets = ["./index.html","./operations.js","./workspace.css","./workspace.js","./workspace-bird.png","./remembered-device.js","./configuration.js","./manifest.json","./icon-192.png","./icon-512.png"];
 const shell = new Set(assets.map(file => new URL(file, self.registration.scope).href));
 
