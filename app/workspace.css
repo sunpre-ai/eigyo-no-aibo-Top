@@ -118,6 +118,16 @@
 }
 /* 初回の読み込みはデータ領域を先に描画し、以降の処理は小さな通知で知らせる。 */
 #pwa-startup{max-width:68rem;margin:1rem auto;padding:1.25rem 1.5rem}
+.pwa-list-sync{display:flex;align-items:center;justify-content:flex-end;gap:.7rem;flex-wrap:wrap;margin:.5rem 0 1rem;color:#365b50;font-size:.9rem}
+.pwa-list-sync[hidden],#pwa-confirm-feedback[hidden]{display:none}
+.pwa-list-sync button{padding:.45rem .85rem;min-height:40px}
+#pwa-confirm-feedback{position:fixed;z-index:3000;bottom:max(1rem,env(safe-area-inset-bottom));right:1rem;max-width:calc(100vw - 2rem);display:flex;align-items:center;gap:.55rem;padding:.65rem .9rem;background:#e8f4ec;border:1px solid #72a487;color:#175443;border-radius:14px;box-shadow:0 4px 18px #16382830;font-weight:700}
+#pwa-confirm-feedback[data-phase=failed]{background:#fff0e7;color:#8a3b1d;border-color:#dd987e}
+.pwa-confirm-mark{display:inline-grid;place-items:center;width:1.55rem;height:1.55rem;border-radius:50%;background:#fff;border:1px solid currentColor}
+.pwa-confirm-pressed,.pwa-confirm-mark{animation:pwa-confirm-pop .28s ease-out}
+@keyframes pwa-confirm-pop{0%{transform:scale(.88)}55%{transform:scale(1.13)}100%{transform:scale(1)}}
+@media(max-width:700px){#pwa-confirm-feedback{bottom:calc(5rem + env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){.pwa-confirm-pressed,.pwa-confirm-mark{animation:none}}
 .pwa-home-links{display:flex;flex-wrap:wrap;gap:.65rem;margin:1rem 0}
 .pwa-startup-rows{display:grid;gap:.75rem;margin:1.25rem 0}
 .pwa-startup-rows span{height:1.1rem;border-radius:.45rem;background:#e2eee7}
