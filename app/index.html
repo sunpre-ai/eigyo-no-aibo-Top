@@ -47,11 +47,15 @@
 <script src="./workspace.js"></script>
 <script src="./configuration.js"></script><script src="./remembered-device.js"></script><script src="./operations.js"></script>
 <style>#pwa-google-login{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.6rem}#pwa-google-login button{width:auto}#pwa-operation-status{font-size:.85rem;color:#365b50}.pwa-test-context{margin-top:.5rem;font-size:.9rem}.pwa-production-read .pwa-test-context{font-weight:700}</style>
-<style>#loading-screen:not([hidden]){position:fixed;inset:auto 1rem 1rem auto;max-width:min(24rem,calc(100vw - 2rem));z-index:100;background:#e2f2e9;color:#1d4b3e;padding:.6rem 1rem;border:1px solid #286d59;border-radius:14px;pointer-events:none;box-shadow:0 3px 12px #20433830}@media(max-width:760px){#loading-screen:not([hidden]){bottom:calc(5rem + env(safe-area-inset-bottom))}}#loading-screen .loading-mascot{display:none}</style>
 </head><body class="pwa-workspace"><header class="pwa-topbar"><span class="pwa-brand">営業の相棒</span>
       <div id="pwa-context" class="pwa-test-context" hidden>隔離試験環境</div>
       <div id="pwa-header-tools" class="pwa-header-tools"><button type="button" id="pwa-settings" aria-expanded="false">設定</button></div>
-    </header><div id="loading-screen" class="loading-screen" role="status" aria-live="polite" aria-atomic="true"><div class="loading-card"><div class="mascot" aria-hidden="true"><span class="bird-speech">もう少し待ってね！</span><span class="aibo-art"></span></div><h2 id="loading-title">アプリを開いています</h2><p>しばらくお待ちください…</p><div class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></div><p class="small">営業の相棒が、最新の情報を確認しています。</p></div></div><main><div id="message" role="status" aria-live="polite"></div><section id="login" class="panel"><img src="./workspace-bird.png" width="120" height="120" alt=""><h2>ログイン</h2><p>登録済みのGoogleアカウントでログインしてください。このブラウザで3か月間ログインを保持します。</p><div id="pwa-google-login"></div><button id="pwa-login-retry" type="button">Googleログインを再表示</button></section><section id="app" hidden><div class="app-toolbar"><strong id="user"></strong><span id="pwa-operation-status" role="status" aria-live="polite"></span><button id="pwa-refresh-shell" type="button" hidden>新しい画面へ更新</button><button id="notifications" class="notification-button" aria-label="新着通知">🔔 お知らせ<span id="notification-count" class="notification-count" hidden></span></button></div><p id="project-data-warning" class="panel" role="status" hidden>案件IDの未設定または重複があるため、一部の案件は表示を保留しています。案件の更新にも影響するため、管理者に確認してください。</p><div id="schedule-priority" hidden aria-live="polite"></div><div id="today-erections" hidden></div><details class="app-controls"><summary>表示・データ更新・設定</summary><div class="row"><label>表示する役割<select id="role"></select></label><button id="refresh">案件データを更新</button><a class="screen-refresh" href="./index.html">🔄 画面を最新版に更新</a><button id="logout">ログアウト</button></div><div class="row past-control"><strong id="case-count"></strong><span id="past-note" class="small"></span><button id="past-toggle" aria-pressed="false">過去物件を表示</button></div></details><section id="admin-preview-banner" class="panel warn" hidden></section><div class="layout"><button type="button" id="menu-toggle" aria-expanded="false" aria-controls="main-nav">☰ ほかの画面を開く</button><nav id="main-nav" aria-label="画面"><button class="home" data-tab="home">🏠 ホーム</button><button id="schedule-nav" data-tab="schedule">🗓 予定</button><button data-tab="cad-monthly" id="cad-monthly-nav">📐 CAD月間実績</button><button data-tab="cad-team" id="cad-team-nav">👥 CADチーム</button><button data-tab="cases">📁 案件</button><button data-tab="quotes">📝 見積用</button><button data-tab="cancellations">📦 受注キャンセル</button><button data-tab="prevention" id="prevention-nav">🛡 ミス・再発防止</button><button data-tab="questions">💬 確認依頼</button><button data-tab="troubles">🆘 困っていること</button><button data-tab="daily" id="daily-nav">📝 日報</button><button data-tab="performance" id="performance-nav">🏆 月間成績</button><button data-tab="prospects" id="prospect-nav">🌱 新規開拓</button></nav><section id="content" tabindex="-1"></section></div><button type="button" id="floating-home" class="floating-home" data-tab="home" aria-label="ホームへ戻る">🏠 ホーム</button></section></main><script>
+    </header><div id="loading-screen" hidden role="status" aria-live="polite"><strong id="loading-title"></strong><p id="pwa-queued-view" hidden></p></div><main><div id="message" role="status" aria-live="polite"></div><section id="login" class="panel"><img src="./workspace-bird.png" width="120" height="120" alt=""><h2>ログイン</h2><p>登録済みのGoogleアカウントでログインしてください。このブラウザで3か月間ログインを保持します。</p><div id="pwa-google-login"></div><button id="pwa-login-retry" type="button">Googleログインを再表示</button></section>
+<section id="pwa-startup" class="panel" hidden>
+  <h2>ホーム</h2><p id="pwa-startup-status" role="status" aria-live="polite"></p>
+  <div class="pwa-startup-rows" aria-hidden="true"><span></span><span></span><span></span></div>
+  <button id="pwa-retry-dashboard" type="button" hidden>業務データを再取得</button>
+</section><section id="app" hidden><div class="app-toolbar"><strong id="user"></strong><span id="pwa-operation-status" role="status" aria-live="polite"></span><button id="pwa-refresh-shell" type="button" hidden>新しい画面へ更新</button><button id="notifications" class="notification-button" aria-label="新着通知">🔔 お知らせ<span id="notification-count" class="notification-count" hidden></span></button></div><p id="project-data-warning" class="panel" role="status" hidden>案件IDの未設定または重複があるため、一部の案件は表示を保留しています。案件の更新にも影響するため、管理者に確認してください。</p><div id="schedule-priority" hidden aria-live="polite"></div><div id="today-erections" hidden></div><details class="app-controls"><summary>表示・データ更新・設定</summary><div class="row"><label>表示する役割<select id="role"></select></label><button id="refresh">案件データを更新</button><a class="screen-refresh" href="./index.html">🔄 画面を最新版に更新</a><button id="logout">ログアウト</button></div><div class="row past-control"><strong id="case-count"></strong><span id="past-note" class="small"></span><button id="past-toggle" aria-pressed="false">過去物件を表示</button></div></details><section id="admin-preview-banner" class="panel warn" hidden></section><div class="layout"><button type="button" id="menu-toggle" aria-expanded="false" aria-controls="main-nav">☰ ほかの画面を開く</button><nav id="main-nav" aria-label="画面"><button class="home" data-tab="home">🏠 ホーム</button><button id="schedule-nav" data-tab="schedule">🗓 予定</button><button data-tab="cad-monthly" id="cad-monthly-nav">📐 CAD月間実績</button><button data-tab="cad-team" id="cad-team-nav">👥 CADチーム</button><button data-tab="cases">📁 案件</button><button data-tab="quotes">📝 見積用</button><button data-tab="cancellations">📦 受注キャンセル</button><button data-tab="prevention" id="prevention-nav">🛡 ミス・再発防止</button><button data-tab="questions">💬 確認依頼</button><button data-tab="troubles">🆘 困っていること</button><button data-tab="daily" id="daily-nav">📝 日報</button><button data-tab="performance" id="performance-nav">🏆 月間成績</button><button data-tab="prospects" id="prospect-nav">🌱 新規開拓</button></nav><section id="content" tabindex="-1"></section></div><button type="button" id="floating-home" class="floating-home" data-tab="home" aria-label="ホームへ戻る">🏠 ホーム</button></section></main><script>
 function applyCadProgressResult(result,expectedToken){if(token!==expectedToken||data?.adminPreview||role!=='CAD'||!result?.saved||!result.project||result.project.id!==result.caseId||!data.projects.some(p=>p.id===result.caseId))return false;data.projects=data.projects.map(p=>p.id===result.caseId?{...p,...result.project}:p);if(result.today)data.today=result.today;if(result.cadWorkToday)data.cadWorkToday=result.cadWorkToday;if(result.cadMonthly)data.cadMonthly=result.cadMonthly;if(data.cadCalendar){data.cadCalendar.items.forEach(x=>{if(x.caseId===result.caseId){x.complete=!!result.project.complete;x.overdue=!x.complete&&!x.multiple&&!x.stale&&x.date<data.today;}});const current=data.projects.find(p=>p.id===result.caseId);if(current.cadCalendarPlan)current.cadCalendarPlan={...current.cadCalendarPlan,complete:!!result.project.complete};}render();return true;}
 function openCadWorkCase(id){const p=data?.projects.find(p=>p.id===id);if(role!=='CAD'||!p||p.cad!==data.user.alias&&!data.user.cadLeader)return;if(p.cad!==data.user.alias)tab='cad-team';selected=id;render();}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-cad-work-case]');if(b){e.stopImmediatePropagation();openCadWorkCase(b.dataset.cadWorkCase);}});
@@ -183,14 +187,29 @@ let token=readLoginToken(),data=null,tab='home',selected='',filter='見積',role
 let previewSelection=null;
 function rpc(name,...args){if(previewSelection){if(['getCadMonthly','getSalesMonthly','getSalesMovementMonth'].includes(name))args=[args[0],args[1],previewSelection.alias,previewSelection.role];if(name==='getQuoteWorkspace')args=[args[0],args[1],args[2],previewSelection.alias,previewSelection.role];if(name==='getDailyReport')return rpc('getAdminPreviewDailyReport',args[0],previewSelection.alias,args[1]);if(!['getDashboard','getCadMonthly','getSalesMonthly','getAdminPreviewDailyReport','getSubmittedDailyReport','getSalesMovementMonth','getQuoteWorkspace','getQuoteDrawing','logout'].includes(name))return Promise.reject(Error('担当者画面は閲覧専用です。変更は管理者画面に戻って行ってください。'));}if(['getDashboard','getNotifications','markNotificationRead','markCaseActivityRead','markSchedulePriorityRead','createQuoteReception','updateQuoteReception','resolveQuoteConflict','saveQuoteSchedule','setQuoteScheduleFixed','addQuoteDrawing'].includes(name))args.push(role);if(name==='getSalesMonthly')args=[args[0],args[1],args[2]||'',args[3]||'',role];if(name==='getQuoteWorkspace')args=[args[0],args[1],args[2],args[3]||'',args[4]||'',role];return window.aiboOperations.invoke(name,args);}
 let messageTimer;function message(s){const el=$('message');clearTimeout(messageTimer);el.textContent=s||'';if(s)messageTimer=setTimeout(()=>{el.textContent=''},14000);}
-let loadingFocus=null;
-function showLoading(title='更新中です'){loadingFocus=document.activeElement;$('loading-title').textContent=title;$('loading-screen').hidden=false;document.body.classList.add('is-loading');document.querySelector('main').inert=true;$('app').setAttribute('aria-busy','true');}
-function hideLoading(){$('loading-screen').hidden=true;document.body.classList.remove('is-loading');document.querySelector('main').inert=false;$('app').removeAttribute('aria-busy');if(loadingFocus?.isConnected&&!loadingFocus.disabled)loadingFocus.focus({preventScroll:true});loadingFocus=null;}
-async function task(fn,title='更新中です'){if(busy)return;busy=true;let failure=null;showLoading(title);document.querySelectorAll('button').forEach(b=>b.disabled=true);try{await fn()}catch(e){failure=e}finally{busy=false;document.querySelectorAll('button').forEach(b=>b.disabled=false);applyPreviewReadOnly();window.aiboOperations.restrictEditing();updateNotificationReadButtons();refreshSchedulePriority();hideLoading();}if(failure)showAppError(failure,title);}
+function showLoading(title='更新中です'){
+  $('loading-title').textContent=title;
+  $('loading-screen').hidden=false;
+}
+function hideLoading(){$('loading-screen').hidden=true;}
+async function task(fn,title='更新中です'){
+  if(busy)return;
+  busy=true;
+  const finish=window.aiboWorkspace.beginTask();
+  showLoading(title);
+  let failure=null;
+  try{await fn();}catch(error){failure=error;}
+  finally{
+    busy=false;
+    finish(!failure);
+    applyPreviewReadOnly();window.aiboOperations.restrictEditing();updateNotificationReadButtons();refreshSchedulePriority();hideLoading();
+  }
+  if(failure)showAppError(failure,title);
+}
 async function load(){try{await loadData();}catch(e){if(String(e.message||e).includes('ログインの有効期限')){clearLoginStorage();token='';previewSelection=null;clearInterval(notificationTimer);notificationTimer=null;$('app').hidden=true;$('login').hidden=false;}throw e;}finally{if(!busy)hideLoading();}}
 let dashboardLoadPromise=null;let dashboardLoadKey='';
 async function loadData(){const key=JSON.stringify([token,previewSelection,role]);if(dashboardLoadPromise&&dashboardLoadKey===key)return dashboardLoadPromise;dashboardLoadKey=key;const pending=performDashboardLoad_();dashboardLoadPromise=pending;try{return await pending;}finally{if(dashboardLoadPromise===pending)dashboardLoadPromise=null;}}
-async function performDashboardLoad_(){const expectedToken=token,expectedPreview=JSON.stringify(previewSelection),expectedRole=role,expectedPrioritySequence=nextSchedulePriorityRead();const snapshot=await rpc('getDashboard',expectedToken,previewSelection?.alias||'',previewSelection?.role||'');if(token!==expectedToken||JSON.stringify(previewSelection)!==expectedPreview||role!==expectedRole)return;snapshot.schedulePriority=mergeSchedulePrioritySnapshot(snapshot.schedulePriority,expectedPrioritySequence,!!snapshot.adminPreview);data=snapshot;$('project-data-warning').hidden=!snapshot.projectRowsUnavailable;data.notifications=mergeNotificationSnapshot(data.notifications);$('login').hidden=true;$('app').hidden=false;$('user').textContent=data.adminPreview?data.adminUser.name+'（管理者）':data.user.name;const old=role;role=data.activeRole||(data.user.roles.includes(old)?old:data.user.roles[0]);const rootRoles=data.adminUser?.roles||data.user.roles;$('role').innerHTML=rootRoles.map(r=>'<option value="'+escape(r)+'">'+escape(r)+'</option>').join('')+(data.previewPeople||[]).map(p=>'<option value="preview:'+escape(p.role)+':'+escape(p.alias)+'">'+(p.role==='CAD'?'図面':'営業')+'：'+escape(p.name)+(p.cadLeader?'（リーダー）':'')+'（試験運用・閲覧）</option>').join('');$('role').value=data.adminPreview?'preview:'+data.adminPreview.role+':'+data.adminPreview.alias:role;updateNotificationBadge();startNotificationPolling();if(tab==='cad-monthly'&&cadMonthlyState?.month)cadMonthlyState=await rpc('getCadMonthly',token,cadMonthlyState.month);if(tab==='performance'&&salesMonthlyState?.month)salesMonthlyState=await rpc('getSalesMonthly',token,salesMonthlyState.month);render();}
+async function performDashboardLoad_(){const expectedToken=token,expectedPreview=JSON.stringify(previewSelection),expectedRole=role,expectedPrioritySequence=nextSchedulePriorityRead();const snapshot=await rpc('getDashboard',expectedToken,previewSelection?.alias||'',previewSelection?.role||'');if(token!==expectedToken||JSON.stringify(previewSelection)!==expectedPreview||role!==expectedRole)return;snapshot.schedulePriority=mergeSchedulePrioritySnapshot(snapshot.schedulePriority,expectedPrioritySequence,!!snapshot.adminPreview);data=snapshot;$('project-data-warning').hidden=!snapshot.projectRowsUnavailable;data.notifications=mergeNotificationSnapshot(data.notifications);$('pwa-startup').hidden=true;$('login').hidden=true;$('app').hidden=false;$('user').textContent=data.adminPreview?data.adminUser.name+'（管理者）':data.user.name;const old=role;role=data.activeRole||(data.user.roles.includes(old)?old:data.user.roles[0]);const rootRoles=data.adminUser?.roles||data.user.roles;$('role').innerHTML=rootRoles.map(r=>'<option value="'+escape(r)+'">'+escape(r)+'</option>').join('')+(data.previewPeople||[]).map(p=>'<option value="preview:'+escape(p.role)+':'+escape(p.alias)+'">'+(p.role==='CAD'?'図面':'営業')+'：'+escape(p.name)+(p.cadLeader?'（リーダー）':'')+'（試験運用・閲覧）</option>').join('');$('role').value=data.adminPreview?'preview:'+data.adminPreview.role+':'+data.adminPreview.alias:role;updateNotificationBadge();startNotificationPolling();if(tab==='cad-monthly'&&cadMonthlyState?.month)cadMonthlyState=await rpc('getCadMonthly',token,cadMonthlyState.month);if(tab==='performance'&&salesMonthlyState?.month)salesMonthlyState=await rpc('getSalesMonthly',token,salesMonthlyState.month);render();}
 function applyPreviewReadOnly(){const preview=!!data?.adminPreview,banner=$('admin-preview-banner');banner.hidden=!preview;if(preview){banner.textContent='🧪 試験運用の画面確認：'+data.adminPreview.name+'さんの'+(role==='CAD'?'CAD':'営業')+'画面を閲覧中（登録・変更はできません）。管理者画面へ戻るには上の「表示する役割」で管理者を選んでください。日程変更は閲覧できますが、通常のお知らせは本人の画面で確認します。';document.querySelectorAll('#content form input,#content form select,#content form textarea,#content form button').forEach(e=>{if(e.closest('#daily-date-form')||e.closest('#cad-month-form')||e.closest('#sales-month-form'))return;e.disabled=true;});document.querySelectorAll('[data-companion-check],[data-companion-action],[data-evening-check],[data-evening-edit]').forEach(e=>e.disabled=true);$('notifications').disabled=false;}}
 function updateMainNavigation(){
   const current=selected&&['home','cases'].includes(tab)?'cases':tab;
@@ -201,7 +220,7 @@ function updateMainNavigation(){
   });
   $('menu-toggle').textContent='☰ メニュー'+(label?'（表示中：'+label+'）':'');
 }
-function render(){document.body.classList.toggle('app-open',!!data);if(data?.prevention){const n=data.prevention.unread;$('prevention-nav').textContent='🛡 ミス・再発防止'+(n?' 🔴 '+n:'');}renderPage();refreshSchedulePriority();refreshTodayErections();updateMainNavigation();window.aiboWorkspace.update(tab,selected);updateEveningPlanPrompt();dailyEntryReady();availabilityFormFill(false);planTravelToggle();document.querySelectorAll('[data-companion]').forEach(companionFields);applyPreviewReadOnly();window.aiboOperations.restrictEditing();}
+function render(){document.body.classList.toggle('app-open',!!data);if(data?.prevention){const n=data.prevention.unread;$('prevention-nav').textContent='🛡 ミス・再発防止'+(n?' 🔴 '+n:'');}renderPage();refreshSchedulePriority();refreshTodayErections();updateMainNavigation();window.aiboWorkspace.update(tab,selected,!data?.adminPreview&&data?.user?.roles.includes("管理者"));updateEveningPlanPrompt();dailyEntryReady();availabilityFormFill(false);planTravelToggle();document.querySelectorAll('[data-companion]').forEach(companionFields);applyPreviewReadOnly();window.aiboOperations.restrictEditing();}
 function canCommunicate(p,wanted){return !!p&&!data.adminPreview&&role===wanted&&data.user.roles.includes(wanted)&&(wanted==='営業'?p.sales:p.cad)===data.user.alias}
 function canCAD(p){return !data.adminPreview&&role==='CAD'&&(!p||!p.archived)&&data.user.roles.includes('CAD')&&(!p||p.cad===data.user.alias)}
 function canSales(p){return !data.adminPreview&&role==='営業'&&(!p||!p.archived)&&data.user.roles.includes('営業')&&(!p||p.sales===data.user.alias)}
@@ -2141,9 +2160,47 @@ document.addEventListener('submit', e => {
 
 <script>
 window.aiboOperations.showMode();
-function showPwaLogin(){
-  window.aiboOperations.setupLogin(value=>task(async()=>{ token=value;await load(); },'ログインしています'),message);
+const pwaStartup=$('pwa-startup');
+function pwaStartupState(text,retry=false){
+  $('login').hidden=true;
+  pwaStartup.hidden=false;
+  $('pwa-startup-status').textContent=text;
+  $('pwa-retry-dashboard').hidden=!retry;
 }
+let pwaAuthStarted=0;
+async function openPwaDashboard(){
+  const started=performance.now(),expectedToken=token;
+  pwaStartupState('業務データを読み込んでいます…');
+  try {
+    await load();
+    if(token===expectedToken){
+      pwaStartup.dataset.dashboardMs=String(Math.round(performance.now()-started));
+      pwaStartup.hidden=true;
+    }
+  } catch(error){
+    if(token===expectedToken){
+      pwaStartupState('業務データを取得できませんでした。',true);
+      message(error.message);
+    }
+  }
+}
+function showPwaLogin(){
+  pwaAuthStarted=0;
+  pwaStartup.hidden=true;
+  $('login').hidden=false;
+  window.aiboOperations.setupLogin(value=>{
+    token=value;
+    if(pwaAuthStarted)pwaStartup.dataset.authMs=String(Math.round(performance.now()-pwaAuthStarted));
+    return openPwaDashboard();
+  },text=>{
+    if(!token){pwaStartup.hidden=true;$('login').hidden=false;}
+    message(text);
+  },()=>{
+    pwaAuthStarted=performance.now();
+    pwaStartupState('ログインを確認しています…');
+  });
+}
+$('pwa-retry-dashboard').onclick=openPwaDashboard;
 window.addEventListener('aibo-session-expired',()=>{
   token='';data=null;clearLoginStorage();clearInterval(notificationTimer);notificationTimer=null;
   previewSelection=null;showPast=false;role='';tab='home';selected='';$('content').replaceChildren();
