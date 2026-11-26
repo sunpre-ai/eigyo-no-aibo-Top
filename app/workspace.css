@@ -116,3 +116,13 @@
   .pwa-workspace .pwa-home-bird { width: 3.25rem; height: 3.25rem; }
   .pwa-workspace .work-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+/* 初回の読み込みはデータ領域を先に描画し、以降の処理は小さな通知で知らせる。 */
+#pwa-startup{max-width:68rem;margin:1rem auto;padding:1.25rem 1.5rem}
+.pwa-startup-rows{display:grid;gap:.75rem;margin:1.25rem 0}
+.pwa-startup-rows span{height:1.1rem;border-radius:.45rem;background:#e2eee7}
+.pwa-startup-rows span:nth-child(2){width:78%}
+.pwa-startup-rows span:nth-child(3){width:89%}
+#loading-screen:not([hidden]){position:fixed;inset:auto 1rem 1rem auto;max-width:min(24rem,calc(100vw - 2rem));z-index:100;background:#e2f2e9;color:#1d4b3e;padding:.65rem 1rem;border:1px solid #286d59;border-radius:14px;pointer-events:none;box-shadow:0 3px 12px #20433830}
+#pwa-queued-view{margin:.25rem 0 0}
+.pwa-property-usage p{white-space:pre-line;margin:.5rem 0}
+@media(max-width:760px){#loading-screen:not([hidden]){bottom:calc(5rem + env(safe-area-inset-bottom))}}

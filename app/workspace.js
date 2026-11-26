@@ -11,7 +11,78 @@
   };
   const icon = tab => '<svg class="pwa-nav-icon" aria-hidden="true" viewBox="0 0 24 24">' +
     (glyphs[tab] || glyphs.more) + '</svg>';
-  let mobileNav, homeSummary;
+  let mobileNav, homeSummary, usagePanel;
+  let taskActive = false, nextNavigation = null;
+  const navSelector = '#main-nav [data-tab], #pwa-mobile-nav button, #notifications, #menu-toggle, #pwa-settings';
+  const instantControl = '#menu-toggle, #pwa-settings, [data-destination="more"]';
+
+  function beginTask() {
+    taskActive = true;
+    const controls = [...document.querySelectorAll('main button, #pwa-header-tools button')]
+      .filter(button => !button.disabled && !button.matches(navSelector));
+    controls.forEach(button => { button.disabled = true; });
+    return success => {
+      taskActive = false;
+      controls.forEach(button => { button.disabled = false; });
+      const next = nextNavigation;
+      nextNavigation = null;
+      const label = document.getElementById('pwa-queued-view');
+      label.hidden = true;
+      label.textContent = '';
+      if (success && next) queueMicrotask(() => {
+        if (next.isConnected && next.getClientRects().length) next.click();
+      });
+    };
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!taskActive || !button || button.matches(instantControl)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    // 保存中の画面や入力は保持し、切替の受付だけをすぐに表示する。
+    if (!button.matches(navSelector)) return;
+    nextNavigation = button;
+    const label = document.getElementById('pwa-queued-view');
+    label.textContent = button.textContent.trim() + ' を処理後に開きます。';
+    label.hidden = false;
+  }, true);
+  document.addEventListener('submit', event => {
+    if (!taskActive) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+
+  function setupUsage(controls) {
+    usagePanel = document.createElement('div');
+    usagePanel.className = 'pwa-property-usage';
+    usagePanel.hidden = true;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = 'プロパティ使用量を確認';
+    const output = document.createElement('p');
+    output.setAttribute('role', 'status');
+    output.setAttribute('aria-live', 'polite');
+    button.onclick = async () => {
+      const session = window.aiboOperations.token();
+      button.disabled = true;
+      output.textContent = '使用量を取得しています…';
+      try {
+        const usage = await window.aiboOperations.invoke('getPwaPropertyUsage', [session]);
+        if (window.aiboOperations.token() !== session || usagePanel.hidden) return;
+        const size = item => item.count.toLocaleString('ja-JP') + '件 ／ ' +
+          (item.bytes / 1024).toLocaleString('ja-JP', { maximumFractionDigits: 1 }) + ' KiB';
+        output.textContent = '全体 ' + size(usage.total) + '\nログイン保持 ' + size(usage.devices) +
+          '\n再送防止 ' + size(usage.receipts) + '\n容量はキーと値のUTF-8換算です。';
+      } catch (error) {
+        if (window.aiboOperations.token() === session) output.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    };
+    usagePanel.append(button, output);
+    controls.append(usagePanel);
+  }
   function labelButton(button, tab, label) {
     const text = document.createElement('span');
     text.textContent = label;
@@ -32,6 +103,7 @@
       controls.open = !controls.open;
       if (controls.open) controls.scrollIntoView({ block: 'nearest' });
     });
+    if (!window.aiboOperations.productionRead) setupUsage(controls);
     const navigation = document.getElementById('main-nav');
     for (const button of navigation.querySelectorAll('button[data-tab]'))
       if (glyphs[button.dataset.tab])
@@ -70,8 +142,12 @@
     }
     app.append(mobileNav);
   }
-  function update(tab, selected) {
+  function update(tab, selected, canCheckUsage) {
     setup();
+    if (usagePanel) {
+      usagePanel.hidden = !canCheckUsage;
+      if (usagePanel.hidden) usagePanel.querySelector('[role="status"]').textContent = '';
+    }
     const current = selected && (tab === 'home' || tab === 'cases') ? 'cases' : tab;
     const destination = mobile.some(item => item[0] === current) ? current : 'more';
     for (const button of mobileNav.querySelectorAll('button')) {
@@ -100,5 +176,5 @@
     }
   }
   document.addEventListener('DOMContentLoaded', setup);
-  window.aiboWorkspace = Object.freeze({ update });
+  window.aiboWorkspace = Object.freeze({ update, beginTask });
 })();

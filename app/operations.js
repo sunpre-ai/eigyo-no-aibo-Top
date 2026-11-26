@@ -342,7 +342,7 @@
     return gsi;
   }
 
-  async function setupLogin(onLogin, onError) {
+  async function setupLogin(onLogin, onError, onAuthenticating = () => {}) {
     const target = document.querySelector('#pwa-google-login');
     target.replaceChildren();
     if (productionRead) {
@@ -370,6 +370,7 @@
     if (device) {
       if (device.expiresAt > Date.now()) {
         try {
+          onAuthenticating();
           await complete(await resumeDevice(device));
           return;
         } catch (error) {
@@ -382,11 +383,13 @@
       await savedDevice.clear().catch(() => {});
     }
     try {
-      const identity = await loadGoogle();
-      const challenge = await call({ action: 'loginChallenge' });
+      const [identity, challenge] = await Promise.all([loadGoogle(), call({ action: 'loginChallenge' })]);
+      // 端末ログインが失効した場合は、Googleのボタンを表示できる画面へ戻す。
+      if (device) onError('');
       identity.initialize({ client_id: config.clientId, nonce: challenge.nonce, auto_select: false,
         callback: async response => {
           try {
+            onAuthenticating();
             const keys = savedDevice && await savedDevice.create().catch(() => null);
             const result = await call({
               action: 'login', credential: response.credential, nonce: challenge.nonce,
