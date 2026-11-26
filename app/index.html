@@ -819,7 +819,7 @@ function caseQuestionPage(ps){const ids=new Set(ps.map(p=>p.id)),all=data.questi
 document.addEventListener('click',e=>{const b=e.target.closest('[data-case-activity-read]');if(b)task(async()=>{const p=data.projects.find(p=>p.id===b.dataset.caseActivityRead);if(!p)return;p.activity=await rpc('markCaseActivityRead',token,p.id,p.activity?.unreadTokens||[]);document.getElementById('case-activity-dialog')?.close();render();message(p.activity.unread?'✓ 表示していた変更を確認しました。その後の新しい変更が残っています':'✓ 変更内容を確認済みにしました。赤丸を消しました');});});
 
 
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const dialog=document.getElementById('case-activity-dialog');if(b.hasAttribute('data-case-history-close')){dialog.close();return;}if(b.dataset.caseHistory){const p=data.projects.find(p=>p.id===b.dataset.caseHistory);if(!p)return;dialog.innerHTML='<button type="button" data-case-history-close>閉じる</button><h2>'+escape(p.customer)+' / '+escape(p.site)+'</h2>'+caseActivityPanel(p);dialog.showModal();}});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const dialog=document.getElementById('case-activity-dialog');if(b.hasAttribute('data-case-history-close')){dialog.close();return;}if(b.dataset.caseHistory){const p=data.projects.find(p=>p.id===b.dataset.caseHistory);if(!p||pwaOpenCaseHistory(p,dialog))return;dialog.innerHTML='<button type="button" data-case-history-close>閉じる</button><h2>'+escape(p.customer)+' / '+escape(p.site)+'</h2>'+caseActivityPanel(p);dialog.showModal();}});
 
 const cancelChecks={work:'CAD・工場の作業停止',materials:'特殊材・金物の発注取消／材料の扱い',delivery:'配送・配車予定の取消',billing:'費用請求・確定済み売上の確認'};
 function orderCancelForm(p){if(data.adminPreview||!['管理者','営業'].includes(role)||p&&p.sales!==data.user.alias&&role!=='管理者')return '';const orders=(p?[p]:visible()).filter(p=>p.outcome==='受注'&&(role==='管理者'||p.sales===data.user.alias));if(!orders.length)return '';return '<details class="panel"><summary>受注キャンセルを登録</summary><p class="warn">登録すると通常の受注一覧・催促から外れます。工場・配車の停止や発注取消は自動では行いません。各担当者へ連絡してください。</p><form data-order-cancel><input type="hidden" name="requestId" value="'+escape(crypto.randomUUID())+'"><label>対象の受注案件<select name="caseId" required>'+orders.map(p=>'<option value="'+escape(p.id)+'">'+escape(p.customer+' / '+p.site)+'</option>').join('')+'</select></label><label>キャンセル日<input name="date" type="date" max="'+data.today+'" value="'+data.today+'" required></label><label>理由<textarea name="reason" required maxlength="500"></textarea></label><label class="daily-recipient"><input type="checkbox" name="confirm" required>対象案件の受注キャンセルを登録し、担当CAD・営業・管理者へ知らせます</label><button class="primary">受注キャンセルを登録する</button></form></details>';}
@@ -2173,7 +2173,7 @@ function pwaTargetView(){
   if(window.aiboOperations.productionRead)return {name:'legacy',caseId:''};
   if(selected&&(['home','overview','cases','questions','notifications','cad-team'].includes(tab)||tab==='quotes'&&role==='管理者'))
     return {name:'detail',caseId:selected};
-  return {name:tab,caseId:''};
+  return {name:tab,caseId:tab==='cases'?(role==='管理者'?progressFilter:filter):''};
 }
 function pwaViewKey(view=pwaTargetView(),displayRole=role){
   return JSON.stringify([pwaDisplayScope(displayRole),view.name,view.caseId]);
@@ -2197,7 +2197,7 @@ function pwaAcceptDashboard(snapshot,view,daily,started){
     snapshot.projectRowsUnavailable??=previous?.projectRowsUnavailable??false;
     if(daily)dailyState=daily;
   }
-  pwaLoadedView={key:pwaViewKey(view,snapshot.activeRole),scope};
+  pwaLoadedView={key:pwaViewKey(view,snapshot.activeRole),scope,name:view.name};
   $('content').dataset.pwaView=view.name;
   $('content').dataset.pwaViewMs=String(Math.round(performance.now()-started));
 }
@@ -2206,6 +2206,14 @@ function pwaViewStatus(view,error){
   content.innerHTML='<section class="panel" role="status"><h2>'+escape(pwaViewLabels[view.name]||'業務画面')+'</h2>'
     +(error?'<p>データを取得できませんでした。</p><button type="button" id="pwa-retry-view">もう一度読み込む</button>':
       '<p>読み込んでいます…</p><div class="pwa-startup-rows" aria-hidden="true"><span></span><span></span><span></span></div>')+'</section>';
+  if(view.name==='cases'&&pwaLoadedView?.scope===pwaDisplayScope()&&pwaLoadedView.name==='cases'){
+    const buckets=content.querySelector('section');
+    const ps=visible();
+    const filters=role==='管理者'?progressTabs(ps):'<div class="filters">'+['見積','受注','上棟済','失注'].map(bucket=>
+      '<button type="button" data-filter="'+bucket+'" aria-pressed="'+(bucket===filter)+'">'+bucket+'物件 '+ps.filter(p=>matchesBucket(p,bucket)).length+'件</button>'
+    ).join('')+'</div>';
+    buckets.insertAdjacentHTML('beforeend',filters);
+  }
   content.dataset.pwaView=error?'error':'loading';
   delete content.dataset.pwaViewMs;
   content.setAttribute('aria-busy',String(!error));
@@ -2266,6 +2274,31 @@ function pwaRenderPrimaryView(){
 function pwaScrollToDetail(id){
   if($(id))$(id).scrollIntoView({behavior:'smooth',block:'start'});
   else pwaDetailAnchor={key:pwaViewKey(),id};
+}
+function pwaOpenCaseHistory(project,dialog){
+  if(window.aiboOperations.productionRead||!project.activity||project.activity.unreadTokens)return false;
+  const expectedToken=token,expectedView=pwaViewKey();
+  const heading='<button type="button" data-case-history-close>閉じる</button><h2>'+escape(project.customer+' / '+project.site)+'</h2>';
+  dialog.innerHTML=heading+'<p role="status">履歴を読み込んでいます…</p>';
+  dialog.showModal();
+  const current=()=>dialog.open&&token===expectedToken&&pwaViewKey()===expectedView&&data?.projects.includes(project);
+  rpc('getDashboardView',expectedToken,'activity',project.id,previewSelection?.alias||'',previewSelection?.role||'')
+    .then(snapshot=>{
+      if(!current())return;
+      const activity=snapshot.projects.find(p=>p.id===project.id)?.activity;
+      if(!activity)throw Error('履歴を表示できませんでした。');
+      project.activity=activity;
+      dialog.innerHTML=heading+caseActivityPanel(project);
+      applyPreviewReadOnly();
+      window.aiboOperations.restrictEditing();
+    })
+    .catch(()=>{
+      if(current()){
+        dialog.innerHTML=heading+'<p role="alert">履歴を取得できませんでした。</p><button type="button" id="pwa-retry-case-history">再取得</button>';
+        $('pwa-retry-case-history').onclick=()=>{dialog.close();pwaOpenCaseHistory(project,dialog);};
+      }
+    });
+  return true;
 }
 function pwaOpenDaily(){
   tab='daily';selected='';dailyState=null;dailyPreview='';dailyViewing=false;dailyEditIndex=-1;dailyOwnerFilter='';
