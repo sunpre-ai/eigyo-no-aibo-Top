@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>案件読み取り照合｜営業の相棒</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/mockup/mockup.css">
+  <link rel="stylesheet" href="/pilot.css">
+  <script src="/pilot.js" type="module"></script>
+</head>
+<body>
+  <main>
+    <h1 class="page-title">営業の相棒｜案件読み取り照合</h1>
+    <p id="instructions">現行版で発行した照合コードを使います。案件の閲覧専用です。</p>
+    <form class="panel" id="connect" autocomplete="off">
+      <label>照合コード <input id="code" required maxlength="36" spellcheck="false" autocomplete="off"></label>
+      <button class="button" type="submit">接続する</button>
+    </form>
+    <form class="panel" id="filters" hidden>
+      <label>表示する役割 <select id="role"></select></label>
+      <label id="team-label" hidden><input id="team" type="checkbox"> CAD全員の進捗を確認</label>
+      <label><input id="past" type="checkbox"> 過去物件を含める</label>
+      <label>案件の種類 <select id="bucket">
+        <option>見積</option><option>受注</option><option>上棟済</option><option>失注</option>
+      </select></label>
+      <button class="button" type="submit">案件データを更新</button>
+      <button class="button" id="disconnect" type="button">照合を終了</button>
+    </form>
+    <p id="status" role="status">照合コードを入力してください。</p>
+    <p id="counts"></p>
+    <div class="section-list" id="cases"></div>
+  </main>
+</body>
+</html>
