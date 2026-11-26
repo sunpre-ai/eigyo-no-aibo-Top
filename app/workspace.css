@@ -118,6 +118,7 @@
 }
 /* 初回の読み込みはデータ領域を先に描画し、以降の処理は小さな通知で知らせる。 */
 #pwa-startup{max-width:68rem;margin:1rem auto;padding:1.25rem 1.5rem}
+.pwa-home-links{display:flex;flex-wrap:wrap;gap:.65rem;margin:1rem 0}
 .pwa-startup-rows{display:grid;gap:.75rem;margin:1.25rem 0}
 .pwa-startup-rows span{height:1.1rem;border-radius:.45rem;background:#e2eee7}
 .pwa-startup-rows span:nth-child(2){width:78%}
