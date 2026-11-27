@@ -55,7 +55,7 @@
   <h2>ホーム</h2><p id="pwa-startup-status" role="status" aria-live="polite"></p>
   <div class="pwa-startup-rows" aria-hidden="true"><span></span><span></span><span></span></div>
   <button id="pwa-retry-dashboard" type="button" hidden>業務データを再取得</button>
-</section><section id="app" hidden><div class="app-toolbar"><strong id="user"></strong><span id="pwa-operation-status" role="status" aria-live="polite"></span><button id="pwa-refresh-shell" type="button" hidden>新しい画面へ更新</button><button id="notifications" class="notification-button" aria-label="新着通知">🔔 お知らせ<span id="notification-count" class="notification-count" hidden></span></button></div><p id="project-data-warning" class="panel" role="status" hidden>案件IDの未設定または重複があるため、一部の案件は表示を保留しています。案件の更新にも影響するため、管理者に確認してください。</p><div id="schedule-priority" hidden aria-live="polite"></div><div id="today-erections" hidden></div><div id="pwa-list-sync" class="pwa-list-sync" hidden><span id="pwa-list-sync-time" role="status"></span><button type="button" id="pwa-list-refresh">最新に更新</button></div><div id="pwa-confirm-feedback" role="status" aria-live="polite" hidden></div><details class="app-controls"><summary>表示・データ更新・設定</summary><div class="row"><label>表示する役割<select id="role"></select></label><button id="refresh">案件データを更新</button><a class="screen-refresh" href="./index.html">🔄 画面を最新版に更新</a><button id="logout">ログアウト</button></div><div class="row past-control"><strong id="case-count"></strong><span id="past-note" class="small"></span><button id="past-toggle" aria-pressed="false">過去物件を表示</button></div></details><section id="admin-preview-banner" class="panel warn" hidden></section><div class="layout"><button type="button" id="menu-toggle" aria-expanded="false" aria-controls="main-nav">☰ ほかの画面を開く</button><nav id="main-nav" aria-label="画面"><button class="home" data-tab="home">🏠 ホーム</button><button data-tab="overview">業務サマリー</button><button id="schedule-nav" data-tab="schedule">🗓 予定</button><button data-tab="cad-monthly" id="cad-monthly-nav">📐 CAD月間実績</button><button data-tab="cad-team" id="cad-team-nav">👥 CADチーム</button><button data-tab="cases">📁 案件</button><button data-tab="quotes">📝 見積用</button><button data-tab="cancellations">📦 受注キャンセル</button><button data-tab="prevention" id="prevention-nav">🛡 ミス・再発防止</button><button data-tab="questions">💬 確認依頼</button><button data-tab="troubles">🆘 困っていること</button><button data-tab="daily" id="daily-nav">📝 日報</button><button data-tab="performance" id="performance-nav">🏆 月間成績</button><button data-tab="prospects" id="prospect-nav">🌱 新規開拓</button></nav><section id="content" tabindex="-1"></section></div><button type="button" id="floating-home" class="floating-home" data-tab="home" aria-label="ホームへ戻る">🏠 ホーム</button></section></main><script>
+</section><section id="app" hidden><div class="app-toolbar"><strong id="user"></strong><span id="pwa-operation-status" role="status" aria-live="polite"></span><button id="pwa-refresh-shell" type="button" hidden>新しい画面へ更新</button><button id="notifications" class="notification-button" aria-label="新着通知">🔔 お知らせ<span id="notification-count" class="notification-count" hidden></span></button></div><p id="project-data-warning" class="panel" role="status" hidden>案件IDの未設定または重複があるため、一部の案件は表示を保留しています。案件の更新にも影響するため、管理者に確認してください。</p><div id="schedule-priority" hidden aria-live="polite"></div><div id="today-erections" hidden></div><div id="pwa-list-sync" class="pwa-list-sync" hidden><span id="pwa-list-sync-time" role="status"></span><button type="button" id="pwa-list-refresh">最新に更新</button></div><div id="pwa-confirm-feedback" role="status" aria-live="polite" hidden></div><div id="pwa-confirm-announcement" role="status" aria-live="polite"></div><details class="app-controls"><summary>表示・データ更新・設定</summary><div class="row"><label>表示する役割<select id="role"></select></label><button id="refresh">案件データを更新</button><a class="screen-refresh" href="./index.html">🔄 画面を最新版に更新</a><button id="logout">ログアウト</button></div><div class="row past-control"><strong id="case-count"></strong><span id="past-note" class="small"></span><button id="past-toggle" aria-pressed="false">過去物件を表示</button></div></details><section id="admin-preview-banner" class="panel warn" hidden></section><div class="layout"><button type="button" id="menu-toggle" aria-expanded="false" aria-controls="main-nav">☰ ほかの画面を開く</button><nav id="main-nav" aria-label="画面"><button class="home" data-tab="home">🏠 ホーム</button><button data-tab="overview">業務サマリー</button><button id="schedule-nav" data-tab="schedule">🗓 予定</button><button data-tab="cad-monthly" id="cad-monthly-nav">📐 CAD月間実績</button><button data-tab="cad-team" id="cad-team-nav">👥 CADチーム</button><button data-tab="cases">📁 案件</button><button data-tab="quotes">📝 見積用</button><button data-tab="cancellations">📦 受注キャンセル</button><button data-tab="prevention" id="prevention-nav">🛡 ミス・再発防止</button><button data-tab="questions">💬 確認依頼</button><button data-tab="troubles">🆘 困っていること</button><button data-tab="daily" id="daily-nav">📝 日報</button><button data-tab="performance" id="performance-nav">🏆 月間成績</button><button data-tab="prospects" id="prospect-nav">🌱 新規開拓</button></nav><section id="content" tabindex="-1"></section></div><button type="button" id="floating-home" class="floating-home" data-tab="home" aria-label="ホームへ戻る">🏠 ホーム</button></section></main><script>
 function applyCadProgressResult(result,expectedToken){if(token!==expectedToken||data?.adminPreview||role!=='CAD'||!result?.saved||!result.project||result.project.id!==result.caseId||!data.projects.some(p=>p.id===result.caseId))return false;data.projects=data.projects.map(p=>p.id===result.caseId?{...p,...result.project}:p);if(result.today)data.today=result.today;if(result.cadWorkToday)data.cadWorkToday=result.cadWorkToday;if(result.cadMonthly)data.cadMonthly=result.cadMonthly;if(data.cadCalendar){data.cadCalendar.items.forEach(x=>{if(x.caseId===result.caseId){x.complete=!!result.project.complete;x.overdue=!x.complete&&!x.multiple&&!x.stale&&x.date<data.today;}});const current=data.projects.find(p=>p.id===result.caseId);if(current.cadCalendarPlan)current.cadCalendarPlan={...current.cadCalendarPlan,complete:!!result.project.complete};}render();return true;}
 function openCadWorkCase(id){const p=data?.projects.find(p=>p.id===id);if(role!=='CAD'||!p||p.cad!==data.user.alias&&!data.user.cadLeader)return;if(p.cad!==data.user.alias)tab='cad-team';selected=id;render();}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-cad-work-case]');if(b){e.stopImmediatePropagation();openCadWorkCase(b.dataset.cadWorkCase);}});
@@ -2175,6 +2175,8 @@ function pwaClearConfirmationSession(){
   pwaConfirmationUi=null;
   const region=$('pwa-confirm-feedback');
   if(region)region.hidden=true;
+  const announcement=$('pwa-confirm-announcement');
+  if(announcement)announcement.textContent='';
 }
 function pwaConfirmationSession(){
   const scope=pwaDisplayScope();
@@ -2201,23 +2203,26 @@ function pwaVisibleNotifications(snapshot){
   return {...snapshot,items,unread:items.filter(item=>item.unread).length};
 }
 function pwaConfirmationFeedback(){
-  const region=$('pwa-confirm-feedback'),expected=token,notice={};
+  const region=$('pwa-confirm-feedback'),announcement=$('pwa-confirm-announcement');
+  const {scope}=pwaConfirmationSession(),notice={};
   pwaConfirmationUi=notice;
-  region.hidden=true;
+  announcement.textContent='';
+  const current=()=>pwaDisplayScope()===scope&&pwaConfirmationUi===notice;
   const update=(text,mode)=>{
-    if(token!==expected||pwaConfirmationUi!==notice)return;
+    if(!current())return;
     region.hidden=false;
     region.dataset.phase=mode;
-    region.replaceChildren();
     const mark=document.createElement('span');
     mark.className='pwa-confirm-mark';
     mark.setAttribute('aria-hidden','true');
     mark.textContent=mode==='failed'?'!':'✓';
-    region.append(mark,document.createTextNode(text));
-    if(mode==='saved')setTimeout(()=>{if(pwaConfirmationUi===notice)region.hidden=true;},2000);
+    region.replaceChildren(mark);
+    if(text)region.append(document.createTextNode(text));
   };
+  update('','pressed');
+  setTimeout(()=>{if(pwaConfirmationUi===notice&&region.dataset.phase==='pressed')region.hidden=true;},700);
   return {
-    saved:()=>update('確認済み','saved'),
+    saved:()=>{if(current())announcement.textContent='確認済み';},
     failed:()=>update('反映を確認できませんでした。再試行してください','failed'),
   };
 }
