@@ -141,3 +141,31 @@
 #pwa-queued-view{margin:.25rem 0 0}
 .pwa-property-usage p{white-space:pre-line;margin:.5rem 0}
 @media(max-width:760px){#loading-screen:not([hidden]){bottom:calc(5rem + env(safe-area-inset-bottom))}}
+/* お知らせカード案1：案件名・変更値・操作を分けて表示する。 */
+.pwa-workspace #notification-panel > .notification-new,
+.pwa-workspace #notification-panel details .notification-new,
+.pwa-workspace #leader-drawing-home .notification-new {
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 5px solid #e84454;
+  border-radius: var(--card);
+  padding: 1rem 1.1rem;
+  overflow-wrap: anywhere;
+}
+.pwa-workspace .notification-head { display: flex; align-items: flex-start; gap: .6rem; }
+.pwa-workspace .notification-head h3 { flex: 1; margin: 0; color: var(--ink); font-size: 1.05rem; line-height: 1.45; }
+.pwa-workspace .notification-head .new-mark,
+.pwa-workspace .notification-head .progress-done { flex: none; margin: 0; }
+.pwa-workspace .notification-meta { margin: .45rem 0 0; }
+.pwa-workspace .notification-body { margin: .9rem 0 0; padding: .75rem .85rem; background: #fff7f7; border-radius: 12px; }
+.pwa-workspace .notification-project { margin: 0 0 .45rem; color: var(--ink); font-weight: 700; }
+.pwa-workspace .notification-fact { margin: .35rem 0 0; color: #c42534; line-height: 1.55; }
+.pwa-workspace .notification-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: .9rem; padding-top: .75rem; border-top: 1px solid var(--line); }
+.pwa-workspace .notification-actions button { min-height: 42px; }
+@media (max-width: 600px) {
+  .pwa-workspace #notification-panel > .notification-new,
+  .pwa-workspace #notification-panel details .notification-new,
+  .pwa-workspace #leader-drawing-home .notification-new { padding: .85rem; }
+  .pwa-workspace .notification-actions { align-items: stretch; }
+}
