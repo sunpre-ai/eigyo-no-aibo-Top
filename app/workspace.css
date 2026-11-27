@@ -123,6 +123,7 @@
 .pwa-list-sync{display:flex;align-items:center;justify-content:flex-end;gap:.7rem;flex-wrap:wrap;margin:.5rem 0 1rem;color:#365b50;font-size:.9rem}
 .pwa-list-sync[hidden],#pwa-confirm-feedback[hidden]{display:none}
 .pwa-list-sync button{padding:.45rem .85rem;min-height:40px}
+.pwa-notifications-sync{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
 #pwa-confirm-feedback{position:fixed;z-index:3000;bottom:max(1rem,env(safe-area-inset-bottom));right:1rem;max-width:calc(100vw - 2rem);display:flex;align-items:center;gap:.55rem;padding:.65rem .9rem;background:#e8f4ec;border:1px solid #72a487;color:#175443;border-radius:14px;box-shadow:0 4px 18px #16382830;font-weight:700}
 #pwa-confirm-feedback[data-phase=failed]{background:#fff0e7;color:#8a3b1d;border-color:#dd987e}
 .pwa-confirm-mark{display:inline-grid;place-items:center;width:1.55rem;height:1.55rem;border-radius:50%;background:#fff;border:1px solid currentColor}
