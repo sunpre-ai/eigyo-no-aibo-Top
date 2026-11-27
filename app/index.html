@@ -691,7 +691,7 @@ async function confirmNotificationRead(button){
 function updateNotificationBadge(){const count=pwaVisibleNotifications(data?.notifications).unread+(role==='営業'?pwaVisibleScheduleItems(data?.schedulePriority).length:0),node=$('notification-count');node.hidden=!count;node.textContent=count>99?'99+':String(count);$('notifications').setAttribute('aria-label','お知らせ 未読'+count+'件');}
 
 function startNotificationPolling(){
-  if(!notificationTimer)notificationTimer=setInterval(()=>{if(!busy)pwaSyncNotifications();},60000);
+  if(!notificationTimer)notificationTimer=setInterval(pwaPollNotifications,60000);
 }
 $('past-toggle').onclick=()=>{showPast=!showPast;selected='';render();};
 $('notifications').onclick=()=>{tab='notifications';selected='';render();};
@@ -2297,6 +2297,7 @@ function pwaConfirmCaseChanges(button){
 let pwaLoadedView=null,pwaPendingView=null,pwaDashboardRead=0,pwaDetailAnchor=null;
 let pwaLists=null,pwaListOpenPending=false,pwaListAutoAt=0,pwaListAutoRead=null,pwaListRefresh=null;
 let pwaNotificationFeed=null;
+const pwaOverviewViews=new Set(['overview','questions','schedule','cad-team','cad-monthly','performance','cancellations','prevention','troubles','prospects']);
 const pwaViewLabels={
   home:'ホーム',overview:'業務サマリー',cases:'案件一覧',detail:'案件詳細',quotes:'見積用',
   questions:'確認依頼',schedule:'営業予定','cad-team':'CADチーム','cad-monthly':'CAD月間実績',
@@ -2318,7 +2319,7 @@ function pwaViewKey(view=pwaTargetView(),displayRole=role){
 async function pwaReadDashboard(view, expectedToken){
   if(['legacy','overview'].includes(view.name))
     return {snapshot:await rpc('getDashboard',expectedToken,previewSelection?.alias||'',previewSelection?.role||'')};
-  if(view.name==='home'&&pwaListOpenPending){
+  if(view.name==='home'&&(pwaListOpenPending||pwaLists?.scope!==pwaDisplayScope())){
     pwaListOpenPending=false;
     const lists=await rpc('getPwaPreparedLists',expectedToken,previewSelection?.alias||'',previewSelection?.role||'').catch(error=>{if(error.code==='INVALID'||error.code==='BUSINESS_ERROR')return null;throw error;});
     if(lists?.home&&lists?.cases)return {snapshot:lists.home,lists};
@@ -2332,16 +2333,19 @@ async function pwaReadDashboard(view, expectedToken){
 function pwaAcceptDashboard(snapshot,view,daily,started,lists){
   const scope=pwaDisplayScope(snapshot.activeRole);
   const previous=pwaLoadedView?.scope===scope?data:null;
+  if(lists?.notifications)snapshot.notifications=lists.notifications;
   if(snapshot.notifications){
     const feed=pwaNotificationState(scope);
     feed.ready=true;
     feed.error=false;
     feed.pending=null;
+    feed.at=lists?.notifications?lists.syncedAt:Date.now();
+    if(lists)feed.prepared=!!lists.notifications;
   }
   if(lists){
     pwaListAutoAt=Date.now();
     pwaStorePreparedLists(lists,scope);
-  }else if(['home','cases'].includes(view.name)){
+  }else if(['home','cases'].includes(view.name)||pwaOverviewViews.has(view.name)){
     pwaListAutoAt ||= Date.now();
     if(pwaLists?.scope!==scope)pwaLists={scope};
     pwaLists[view.name]={value:snapshot,at:Date.now()};
@@ -2413,7 +2417,7 @@ function pwaEnsureDashboardView(){
 }
 function pwaNotificationState(scope=pwaDisplayScope()){
   if(pwaNotificationFeed?.scope!==scope)
-    pwaNotificationFeed={scope,ready:false,error:false,pending:null};
+    pwaNotificationFeed={scope,ready:false,error:false,pending:null,at:0,prepared:false};
   return pwaNotificationFeed;
 }
 function pwaSyncNotifications(){
@@ -2429,6 +2433,7 @@ function pwaSyncNotifications(){
   pending.then(snapshot=>{
     if(!current())return;
     feed.ready=true;
+    feed.at=Date.now();
     data.notifications=mergeNotificationSnapshot(snapshot);
     data.schedulePriority=mergeSchedulePrioritySnapshot(snapshot.schedulePriority,prioritySequence);
     if(!selected||tab!=='notifications')refreshNotificationPanel();
@@ -2439,6 +2444,10 @@ function pwaSyncNotifications(){
     if(!selected||tab!=='notifications')refreshNotificationPanel();
   }).finally(()=>{if(feed.pending===pending)feed.pending=null;});
   return pending;
+}
+function pwaPollNotifications(){
+  const feed=pwaNotificationState();
+  if(!busy&&(!feed.prepared||!feed.ready))pwaSyncNotifications();
 }
 function pwaNotificationPageState(){
   if(window.aiboOperations.productionRead||data.adminPreview)return '';
@@ -2463,12 +2472,25 @@ function pwaStorePreparedLists(lists,scope){
     if((pwaLists[view]?.at||0)<lists.syncedAt)
       pwaLists[view]={value:lists[view],at:lists.syncedAt};
   }
+  if(lists.overview&&(pwaLists.overview?.at||0)<lists.syncedAt){
+    pwaLists.overview={
+      value:{...lists.cases,...lists.overview,schedulePriority:lists.home.schedulePriority},
+      at:lists.syncedAt,prepared:true
+    };
+  }else if(!lists.overview&&pwaLists.overview?.prepared){
+    delete pwaLists.overview;
+  }
+}
+function pwaListRecord(view,scope=pwaDisplayScope()){
+  if(pwaLists?.scope!==scope)return null;
+  const own=pwaLists[view.name],overview=pwaOverviewViews.has(view.name)&&pwaLists.overview;
+  return overview&&(overview.at>(own?.at||0))?overview:own;
 }
 function pwaRestoreListView(view){
   const scope=pwaDisplayScope();
-  const record=['home','cases'].includes(view.name)&&pwaLists?.scope===scope?pwaLists[view.name]:null;
+  const record=pwaListRecord(view,scope);
   if(!record)return false;
-  const next=record.value,previous=pwaLoadedView?.scope===scope?data:null;
+  const next={...record.value},previous=pwaLoadedView?.scope===scope?data:null;
   next.notifications=previous?.notifications||next.notifications||{unread:0,items:[]};
   next.schedulePriority=previous?.schedulePriority||mergeSchedulePrioritySnapshot(next.schedulePriority,nextSchedulePriorityRead(),!!next.adminPreview);
   pwaApplyConfirmedReports(next);
@@ -2484,9 +2506,9 @@ function pwaUpdateListSync(){
   const panel=$('pwa-list-sync');
   if(!panel)return;
   const view=pwaTargetView(),scope=pwaDisplayScope();
-  const record=pwaLists?.scope===scope&&pwaLists[view.name];
-  panel.hidden=!record;
-  if(!record)return;
+  const record=view.name==='notifications'?pwaNotificationState(scope):pwaListRecord(view,scope);
+  panel.hidden=!record?.at;
+  if(!record?.at)return;
   const time=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(record.at);
   const pending=pwaListRefresh?.scope===scope;
   $('pwa-list-sync-time').textContent=(pending?'最新の情報を取得中 · ':'')+'最終同期 '+time;
@@ -2495,7 +2517,8 @@ function pwaUpdateListSync(){
 async function pwaRefreshCurrentList(){
   const scope=pwaDisplayScope();
   const view=pwaTargetView();
-  if(!token||busy||pwaListRefresh?.scope===scope||!['home','cases'].includes(view.name))return;
+  if(!token||busy||pwaListRefresh?.scope===scope||
+      !['home','cases','notifications'].includes(view.name)&&!pwaOverviewViews.has(view.name))return;
   const request={scope,key:pwaViewKey(view)};
   pwaListRefresh=request;
   pwaUpdateListSync();
@@ -2515,15 +2538,38 @@ function pwaReadPreparedQuietly(){
   if(hour<6||hour>=21)return;
   const scope=pwaDisplayScope(),expectedToken=token;
   pwaListAutoAt=Date.now();
+  const prioritySequence=nextSchedulePriorityRead();
   const pending=rpc('getPwaPreparedLists',expectedToken,previewSelection?.alias||'',previewSelection?.role||'');
   pwaListAutoRead=pending;
   pending.then(lists=>{
     if(!lists?.home||!lists?.cases||pwaDisplayScope()!==scope||lists.role!==role)return;
-    const view=pwaTargetView(),previous=pwaLists?.[view.name];
+    const view=pwaTargetView(),previous=pwaListRecord(view,scope);
     pwaStorePreparedLists(lists,scope);
-    if(previous===pwaLists[view.name]||!['home','cases'].includes(view.name)||busy||pwaListRefresh||
+    const feed=pwaNotificationState(scope);
+    if(lists.notifications){
+      feed.prepared=true;
+      if(lists.syncedAt>feed.at){
+        feed.ready=true;feed.error=false;feed.pending=null;feed.at=lists.syncedAt;
+        data.notifications=mergeNotificationSnapshot(lists.notifications);
+        data.schedulePriority=mergeSchedulePrioritySnapshot(lists.home.schedulePriority,prioritySequence);
+        if(!selected||tab!=='notifications')refreshNotificationPanel();
+        refreshSchedulePriority();
+        pwaUpdateListSync();
+      }
+    }else if(!lists.notifications&&feed.prepared){
+      feed.prepared=false;feed.ready=false;feed.at=0;
+      data.notifications={unread:0,items:[]};
+      if(!selected||tab!=='notifications')refreshNotificationPanel();
+      pwaUpdateListSync();
+      pwaSyncNotifications();
+    }
+    if(previous===pwaListRecord(view,scope)||busy||pwaListRefresh||
         document.querySelector('#content details[open], #content form:focus-within, dialog[open]'))return;
     if(pwaRestoreListView(view))render();
+    else if(previous?.prepared){
+      pwaLoadedView=null;
+      render();
+    }
   }).catch(()=>{}).finally(()=>{if(pwaListAutoRead===pending)pwaListAutoRead=null;});
 }
 function pwaClearPreparedLists(){
