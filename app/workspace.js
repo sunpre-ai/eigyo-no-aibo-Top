@@ -115,7 +115,7 @@
     homeSummary.className = 'pwa-home-summary';
     content.before(page);
     page.append(homeSummary);
-    for (const id of ['project-data-warning', 'admin-preview-banner', 'schedule-priority', 'today-erections'])
+    for (const id of ['project-data-warning', 'admin-preview-banner', 'today-erections'])
       page.append(document.getElementById(id));
     page.append(content);
     const menu = document.getElementById('menu-toggle');

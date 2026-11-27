@@ -58,6 +58,8 @@
 }
 .pwa-workspace .pwa-page, .pwa-workspace #content { min-width: 0; }
 .pwa-workspace .pwa-home-summary:empty { display: none; }
+/* 最優先の日程変更は旧画面と同じく、ナビとホームの集計より前に表示する。 */
+.pwa-workspace #schedule-priority { max-width: 1168px; margin-inline: auto; }
 .pwa-workspace .pwa-page #project-data-warning,
 .pwa-workspace .pwa-page #admin-preview-banner { margin: 0 0 .75rem; }
 .pwa-workspace #content > h2 { font-size: clamp(1.2rem, 3vw, 1.55rem); margin-block: .35rem .65rem; }
@@ -124,10 +126,10 @@
 #pwa-confirm-feedback{position:fixed;z-index:3000;bottom:max(1rem,env(safe-area-inset-bottom));right:1rem;max-width:calc(100vw - 2rem);display:flex;align-items:center;gap:.55rem;padding:.65rem .9rem;background:#e8f4ec;border:1px solid #72a487;color:#175443;border-radius:14px;box-shadow:0 4px 18px #16382830;font-weight:700}
 #pwa-confirm-feedback[data-phase=failed]{background:#fff0e7;color:#8a3b1d;border-color:#dd987e}
 .pwa-confirm-mark{display:inline-grid;place-items:center;width:1.55rem;height:1.55rem;border-radius:50%;background:#fff;border:1px solid currentColor}
-.pwa-confirm-pressed,.pwa-confirm-mark{animation:pwa-confirm-pop .28s ease-out}
+.pwa-confirm-mark{animation:pwa-confirm-pop .28s ease-out}
 @keyframes pwa-confirm-pop{0%{transform:scale(.88)}55%{transform:scale(1.13)}100%{transform:scale(1)}}
 @media(max-width:700px){#pwa-confirm-feedback{bottom:calc(5rem + env(safe-area-inset-bottom))}}
-@media(prefers-reduced-motion:reduce){.pwa-confirm-pressed,.pwa-confirm-mark{animation:none}}
+@media(prefers-reduced-motion:reduce){.pwa-confirm-mark{animation:none}}
 .pwa-home-links{display:flex;flex-wrap:wrap;gap:.65rem;margin:1rem 0}
 .pwa-startup-rows{display:grid;gap:.75rem;margin:1.25rem 0}
 .pwa-startup-rows span{height:1.1rem;border-radius:.45rem;background:#e2eee7}
