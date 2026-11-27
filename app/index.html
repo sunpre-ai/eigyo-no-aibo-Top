@@ -282,7 +282,7 @@ function refreshTodayErections(){
 
 function card(p){return '<article class="case-card '+(p.complete===true?'case-card-completed':'')+'"><span class="pill">'+escape(inErectionBucket(p)?(p.erectionDone?'上棟済':'上棟済枠・実施確認待ち'):p.outcome)+' / '+escape(caseVisualState(p).title)+'</span><h3>'+escape(p.customer)+' / '+escape(p.site)+' '+caseActivityBadge(p)+'</h3>'+caseActivityHint(p)+customerMistakeHistory(p)+customerGuidanceHint(p)+receiptDate(p)+caseDates(p)+'<p class="small">営業 '+escape(p.sales)+' / CAD '+escape(p.cad)+'</p>'+status(p,false)+'<button class="primary" data-case="'+escape(p.id)+'">案件・確認内容を開く</button></article>'}
 function question(q){const p=data.projects.find(p=>p.id===q[1]);return '<article><span class="pill">'+progressText(q[7])+'</span><h3>'+escape(q[2])+'</h3><p>'+escape(p?.customer)+' / '+escape(p?.site)+'</p><p>'+escape(q[3])+'</p><p class="small">期限 '+escape(q[6])+' / CAD '+escape(q[4])+' → 営業 '+escape(q[5])+'</p>'+(q[8]?'<p><strong>回答：</strong>'+escape(q[8])+'</p>':'')+(canCommunicate(p,'営業')&&q[7]==='回答待ち'?'<form data-answer="'+escape(q[0])+'"><label>回答<textarea name="answer" required maxlength="800"></textarea></label><button class="primary">回答をCADへ知らせる</button></form>':'')+(canCommunicate(p,'CAD')&&q[7]==='CAD確認待ち'?'<button data-resolve="'+escape(q[0])+'">回答を確認・解決する</button>':'')+'</article>'}
-function report(r){return '<article><span class="pill">'+progressText(r[7]==='営業確認済み'?'営業確認済':r[7])+'</span><h3>📣 見積図面の入力ができました</h3><p>'+escape(data.projects.find(p=>p.id===r[1])?.site)+'</p><p>'+escape(r[2])+' / '+escape(r[3])+' / CAD '+escape(r[5])+'</p><p>'+escape(r[4])+'</p>'+(canSales()&&r[7]==='営業未確認'?'<button class="primary" data-ack="'+escape(r[0])+'">確認しました</button>':'')+'</article>'}
+function report(r){const pending=pwaConfirmationSession().pending.has('drawing:'+String(r[0]));return '<article'+(pending?' hidden':'')+'><span class="pill">'+progressText(r[7]==='営業確認済み'?'営業確認済':r[7])+'</span><h3>📣 見積図面の入力ができました</h3><p>'+escape(data.projects.find(p=>p.id===r[1])?.site)+'</p><p>'+escape(r[2])+' / '+escape(r[3])+' / CAD '+escape(r[5])+'</p><p>'+escape(r[4])+'</p>'+(canSales()&&r[7]==='営業未確認'?'<button class="primary" data-ack="'+escape(r[0])+'">確認しました</button>':'')+'</article>'}
 
 function progressChoices(source,who){return who==='営業'?(source==='見積'?['打合せ中','見積作成中','見積書提出','先方確認待ち','価格交渉中','次回訪問調整中','売上確認待ち','完了']:['打合せ中','仕様書作成中','仕様書引継ぎ済み','承認待ち','承認取得済み','日程確認中','材料・金物手配中','現場・配送条件確認中','値決め中','見積書提出','対応完了','売上確認待ち','完了']):(source==='見積'?['図面下打ち中','図面提出済','図面訂正中','営業確認待ち']:['仕様書確認中','仕様書完成','初期入力済','図面作成中','図面訂正中','承認待ち','図面確定','仮木取表作成中','仮木取表提出済','データ作成中','データ最終確認中','加工データ全て完成','準備材指示済','金物発注済','最終明細書作成中','最終明細書提出済','営業確認待ち'])}
 function sheetChoice(name,label,values,value){return '<label>'+label+'<select name="'+name+'">'+values.map(v=>'<option value="'+escape(v)+'" '+(v===value?'selected':'')+'>'+escape(v||'未入力')+'</option>').join('')+'</select></label>'}
@@ -470,7 +470,7 @@ function managerHome(ps){
 
 let drawingBatchRequest=null;
 
-function leaderDrawingHome(){if(role!=='CAD'||!data.user.cadLeader)return '';if(!data.adminPreview&&data.adminDigest&&!data.adminDigest.unavailable)return '<p class="small">見積図面の新しい完了報告は上のダイジェストにまとめます。これまでのお知らせは<button type="button" data-tab="notifications">🔔 お知らせで確認</button>から確認できます。</p>';const preview=!!data.adminPreview,notices=(data.notifications?.items||[]).filter(n=>n.id.startsWith('cad-quote-report:')),fresh=notices.filter(n=>n.unread),read=notices.filter(n=>!n.unread);const previewReports=preview?(data.reports||[]).filter(r=>String(r[9]||'').slice(0,10)>='2026-10-28'):[];return '<section id="leader-drawing-home" class="panel"><h2>📣 チームの見積図面・入力完了 '+(!preview&&fresh.length?'<span class="new-mark">新着 '+fresh.length+'件</span>':'')+'</h2><p class="small">CADチーム全員の完了報告です（2026/10/28以降の報告）。営業の確認とは別に、水金さんの確認を記録します。</p>'+(preview?'<p class="read-only-note">閲覧プレビューです。新着数・確認ボタンは本人のログインで表示します。</p>'+previewReports.map(r=>{const p=data.projects.find(p=>p.id===r[1]);return p?'<article><h3>'+escape(p.customer+' ／ '+p.site)+'</h3>'+receiptDate(p)+'<p>入力担当：'+escape(r[5])+' ／ 完了日：'+escape(r[2])+'</p><button data-case="'+escape(p.id)+'">案件を見る</button></article>':'';}).join(''):(!fresh.length?'<p class="progress-done">✓ 未確認の入力完了報告はありません。</p>':fresh.map(n=>notificationItem(n)+(n.caseId&&data.projects.some(p=>p.id===n.caseId)?'<button data-case="'+escape(n.caseId)+'">案件を見る</button>':'')).join(''))+(read.length?'<details><summary>確認済み '+read.length+'件</summary>'+read.map(notificationItem).join('')+'</details>':''))+'</section>';}
+function leaderDrawingHome(){if(role!=='CAD'||!data.user.cadLeader)return '';if(!data.adminPreview&&data.adminDigest&&!data.adminDigest.unavailable)return '<p class="small">見積図面の新しい完了報告は上のダイジェストにまとめます。これまでのお知らせは<button type="button" data-tab="notifications">🔔 お知らせで確認</button>から確認できます。</p>';const preview=!!data.adminPreview,notices=pwaVisibleNotifications(data.notifications).items.filter(n=>n.id.startsWith('cad-quote-report:')),fresh=notices.filter(n=>n.unread),read=notices.filter(n=>!n.unread);const previewReports=preview?(data.reports||[]).filter(r=>String(r[9]||'').slice(0,10)>='2026-10-28'):[];return '<section id="leader-drawing-home" class="panel"><h2>📣 チームの見積図面・入力完了 '+(!preview&&fresh.length?'<span class="new-mark">新着 '+fresh.length+'件</span>':'')+'</h2><p class="small">CADチーム全員の完了報告です（2026/10/28以降の報告）。営業の確認とは別に、水金さんの確認を記録します。</p>'+(preview?'<p class="read-only-note">閲覧プレビューです。新着数・確認ボタンは本人のログインで表示します。</p>'+previewReports.map(r=>{const p=data.projects.find(p=>p.id===r[1]);return p?'<article><h3>'+escape(p.customer+' ／ '+p.site)+'</h3>'+receiptDate(p)+'<p>入力担当：'+escape(r[5])+' ／ 完了日：'+escape(r[2])+'</p><button data-case="'+escape(p.id)+'">案件を見る</button></article>':'';}).join(''):(!fresh.length?'<p class="progress-done">✓ 未確認の入力完了報告はありません。</p>':fresh.map(n=>notificationItem(n)+(n.caseId&&data.projects.some(p=>p.id===n.caseId)?'<button data-case="'+escape(n.caseId)+'">案件を見る</button>':'')).join(''))+(read.length?'<details><summary>確認済み '+read.length+'件</summary>'+read.map(notificationItem).join('')+'</details>':''))+'</section>';}
 function drawingAreaValue(value){const s=String(value??'').normalize('NFKC').trim().replace(/[,\s]/g,'').replace(/坪$/,'');return /^\d+(?:\.\d+)?$/.test(s)&&Number.isFinite(Number(s))&&Number(s)>0?Number(s):null;}
 function drawingAreaInput(p,disabled=false){return drawingAreaValue(p.quoteArea)!==null?'<p class="small">実績に計上する坪数：'+escape(p.quoteArea)+' 坪</p>':'<div class="warn drawing-area-required"><p><strong>⚠ 坪数が未入力です。実績に加算するため、入力してから完了を報告してください。</strong></p><label>確認した坪数<input name="area" type="number" min="0.01" max="1000000" step="any" required '+(disabled?'disabled ':'')+'></label><p class="small">入力した坪数は管理台帳にも保存します。</p></div>';}
 function drawingReportItem(p,note,areaInput){const item={id:p.id,expectedVersion:p.quoteVersion||1,revision:'',note};if(areaInput){item.area=areaInput.value;item.expectedArea=String(p.quoteArea||'');}return item;}
@@ -569,7 +569,7 @@ function mergeSchedulePrioritySnapshot(snapshot,sequence,preview=false){
 }
 function schedulePriorityPanel(snapshot){
  if(role==='管理者'||(role==='営業'&&tab!=='notifications'))return '';
- const items=snapshot?.items||[];if(!items.length&&!snapshot?.unavailable)return '';
+ const items=pwaVisibleScheduleItems(snapshot);if(!items.length&&!snapshot?.unavailable)return '';
  const preview=!!data?.adminPreview,state=preview?{pending:new Set(),errors:new Map()}:schedulePriorityState();
  const dateRow=(label,before,after)=>'<div class="schedule-priority-date"><strong>'+label+'</strong><span>'+(before!==after?'<span class="schedule-priority-before">'+escape(before||'未定')+'</span> → <b>'+escape(after||'未定')+'</b>':'<b>'+escape(after||'未定')+'</b><small>（変更なし）</small>')+'</span></div>';
  const card=x=>{const key=x.caseId+'|'+x.fingerprint,pending=state.pending.has(key);return '<article class="schedule-priority-card"><h3><span class="pill">'+escape(x.kind)+'</span> '+escape(x.customer+' ／ '+x.site)+'</h3><div class="schedule-priority-dates">'+dateRow('上棟日',x.beforeErection,x.erection)+dateRow('第一出荷日',x.beforeShipping,x.shipping)+'</div><div class="schedule-priority-actions"><small>営業 '+escape(x.sales||'未設定')+' ／ CAD '+escape(x.cad||'未設定')+(x.at?' ／ 記録 '+escape(x.at):'')+'</small><button type="button" class="primary" data-schedule-priority-read="'+escape(x.caseId)+'" data-fingerprint="'+escape(x.fingerprint)+'" '+(preview||pending||busy?'disabled':'')+'>'+(preview?'閲覧プレビュー':pending?'確認を保存中…':'この日程を確認しました')+'</button></div>'+(state.errors.has(key)?'<p class="late" role="status">'+escape(state.errors.get(key))+'</p>':'')+'</article>';};
@@ -589,7 +589,7 @@ async function confirmSchedulePriority(button){
  if(!token||!data||data.adminPreview||busy)return;
  const state=schedulePriorityState(),id=button.dataset.schedulePriorityRead,fingerprint=button.dataset.fingerprint,key=id+'|'+fingerprint;
  if(state.pending.has(key)||!(data.schedulePriority?.items||[]).some(x=>x.caseId===id&&x.fingerprint===fingerprint))return;
- const cue=pwaConfirmationFeedback(button);state.pending.add(key);state.errors.delete(key);refreshSchedulePriority();
+ const cue=pwaConfirmationFeedback();state.pending.add(key);state.errors.delete(key);refreshSchedulePriority();
  try{
   const result=await pwaQueueConfirmation(()=>token===state.token?rpc('markSchedulePriorityRead',state.token,id,fingerprint):null);
   if(token!==state.token||!result?.saved||result.caseId!==id||result.fingerprint!==fingerprint){if(token!==state.token)return;throw Error('確認の保存結果を確認できませんでした');}
@@ -669,8 +669,8 @@ async function confirmNotificationRead(button){
   const id=button.dataset.notificationRead,state=notificationReadState();
   const item=data.notifications?.items.find(item=>item.id===id);
   if(!item?.unread||state.pending.has(id))return;
-  const cue=pwaConfirmationFeedback(button);state.pending.set(id,true);
-  updateNotificationReadButtons();
+  const cue=pwaConfirmationFeedback();state.pending.set(id,true);
+  refreshNotificationPanel();
   // 操作は続けて受け付け、GASへの保存要求は一件ずつ送る。
   const save=state.queue.then(async()=>{
     try{
@@ -688,7 +688,7 @@ async function confirmNotificationRead(button){
   state.queue=save.catch(()=>{});
   return save;
 }
-function updateNotificationBadge(){const count=(data?.notifications?.unread||0)+(role==='営業'?(data?.schedulePriority?.items||[]).length:0),node=$('notification-count');node.hidden=!count;node.textContent=count>99?'99+':String(count);$('notifications').setAttribute('aria-label','お知らせ 未読'+count+'件');}
+function updateNotificationBadge(){const count=pwaVisibleNotifications(data?.notifications).unread+(role==='営業'?pwaVisibleScheduleItems(data?.schedulePriority).length:0),node=$('notification-count');node.hidden=!count;node.textContent=count>99?'99+':String(count);$('notifications').setAttribute('aria-label','お知らせ 未読'+count+'件');}
 
 let notificationPolling=false;function startNotificationPolling(){if(notificationTimer)return;notificationTimer=setInterval(async()=>{if(!token||document.hidden||busy||notificationPolling||data?.adminPreview)return;notificationPolling=true;const currentToken=token,currentRole=role,prioritySequence=nextSchedulePriorityRead();try{const n=await rpc('getNotifications',currentToken);if(token!==currentToken||role!==currentRole||!data||data.adminPreview)return;data.schedulePriority=mergeSchedulePrioritySnapshot(n.schedulePriority,prioritySequence);data.notifications=mergeNotificationSnapshot(n);refreshNotificationPanel();refreshSchedulePriority();}catch(e){if(token===currentToken&&role===currentRole&&data&&!data.adminPreview){data.schedulePriority=mergeSchedulePrioritySnapshot({unavailable:true},prioritySequence);refreshSchedulePriority();}}finally{notificationPolling=false;}},60000);}
 $('past-toggle').onclick=()=>{showPast=!showPast;selected='';render();};
@@ -803,7 +803,7 @@ function companionPlanList(plans){if(!plans?.length)return '';const open=plans.f
 function timberPanel(p){if(p.source!=='データ')return '';const state=p.provisionalTimber,editable=canCAD(p)&&!p.archived;return '<section class="panel"><h3>📋 仮木取表</h3><p>提出期限：<strong>'+escape(p.timberDue||p.timberDueNote||'日程確認が必要')+'</strong>（第一出荷日の5営業日前）</p><p>'+ (p.timberSubmitted?'<span class="progress-done">✓ 提出済 '+escape(state.date)+'</span>':p.timberScheduleChanged?'<span class="pill warn">出荷日変更・提出内容の再確認が必要</span>':'<span class="pill warn">'+escape(state?.status||'未提出・未登録')+'</span>')+'</p>'+(state?'<p class="small">'+escape(state.by)+' ／ '+escape(state.at)+(state.note?'<br>'+escape(state.note):'')+'</p>':'')+(editable?'<form data-timber="'+escape(p.id)+'"><input type="hidden" name="shipping" value="'+escape(p.shipping||'')+'"><label>仮木取表の状況<select name="status"><option '+(!p.timberSubmitted?'selected':'')+'>作成中</option><option '+(p.timberSubmitted?'selected':'')+'>提出済</option></select></label><label>提出日（提出済の場合）<input name="date" type="date" max="'+data.today+'" value="'+escape(p.timberSubmitted?state.date:data.today)+'"></label><label>共有メモ（任意）<input name="note" maxlength="300" value="'+escape(state?.note||'')+'"></label><button class="primary">仮木取表の状況を登録</button></form>':'')+'</section>';}
 function timberReminderHome(ps){if(!['CAD','管理者'].includes(role))return '';const items=ps.filter(p=>p.timberReminder).sort((a,b)=>(a.timberDue||'9999').localeCompare(b.timberDue||'9999')),done=ps.filter(p=>p.timberSubmitted&&!p.archived&&!inErectionBucket(p));const row=p=>'<article class="'+(p.timberSubmitted?'reviewed-item':p.timberDue&&p.timberDue<=data.today?'late':'warn')+'"><strong>'+escape(p.customer+' / '+p.site)+'</strong><p>CAD '+escape(p.cad)+' ／ 第一出荷日 '+escape(p.shipping||'未登録')+'<br>仮木取表の提出期限：<strong>'+escape(p.timberDue||p.timberDueNote)+'</strong></p>'+(p.timberSubmitted?'<p class="progress-done">✓ 提出済 '+escape(p.provisionalTimber.date)+'</p>':p.timberScheduleChanged?'<p>⚠ 出荷日変更・提出内容を再確認してください</p>':'<p>'+escape(p.provisionalTimber?.status||'未提出・未登録')+'</p>')+(role==='CAD'?'<button data-case="'+escape(p.id)+'">案件で確認・提出を登録</button>':'')+'</article>';const content='<section class="panel timber-reminders"><h2>📋 仮木取表の提出</h2><p>第一出荷日の1週間前＝<strong>5営業日前（土日・祝日を除く）</strong>までに提出します。</p><p>提出待ち <strong>'+items.length+'件</strong> ／ 本日期限・超過 '+items.filter(p=>p.timberDue&&p.timberDue<=data.today).length+'件</p>'+items.slice(0,3).map(row).join('')+(items.length>3?'<details><summary>ほかの提出待ち '+(items.length-3)+'件</summary>'+items.slice(3).map(row).join('')+'</details>':'')+(!items.length?'<p class="progress-done">✓ 現在の提出待ちはありません。</p>':'')+(done.length?'<details><summary>✓ 提出済み '+done.length+'件</summary>'+done.map(row).join('')+'</details>':'')+'</section>';return role==='CAD'?homeWorkOverview(content,'📋 仮木取表の提出待ち '+items.length+'件 ／ 本日・期限超過 '+items.filter(p=>p.timberDue&&p.timberDue<=data.today).length+'件',items.some(p=>p.timberDue&&p.timberDue<=data.today)):content;}
 function notificationItem(x){const pending=notificationReadState().pending.has(x.id);return '<article class="'+(x.unread?'notification-new':'reviewed-item')+'">'+(x.unread?'<span class="new-mark">新着</span>':'<span class="progress-done">✓ 確認済</span>')+'<h3>'+escape(x.subject)+'</h3><p class="small">'+escape(x.at)+' ／ '+(x.mailStatus==='アプリ内通知'?'アプリ内通知':'メール：'+escape(x.mailStatus))+'</p><p class="notification-body">'+escape(x.body)+'</p>'+(!x.unread&&x.readAt?'<p class="small">確認：'+escape(x.readAt)+' ／ '+escape(data.user.name)+'</p>':'')+(x.unread?'<button class="primary" data-notification-read="'+escape(x.id)+'"'+(pending?' disabled aria-busy="true"':'')+'>'+(pending?'保存中…':'確認しました')+'</button>':'')+((x.id?.startsWith('quote-intake:')||x.id?.startsWith('quote-admin-created:')||x.id?.startsWith('quote-cad-leader:'))&&x.caseId&&(x.id.startsWith('quote-cad-leader:')||data.projects?.some(p=>p.id===x.caseId))?'<button type="button" data-case="'+escape(x.caseId)+'">'+(x.id.startsWith('quote-cad-leader:')?'CAD担当を決める':x.id.startsWith('quote-admin-created:')?'登録された案件を開く':'依頼の案件を開く')+'</button>':'')+'</article>';}
-function notificationPage(){const scheduleNote=role==='営業'?'<p class="small">担当案件の上棟日・第一出荷日の未確認の変更は、このページの上部で変更前→変更後を確認できます。下の一覧はその他のお知らせです。</p>':'';const n=data.notifications||{unread:0,items:[]},fresh=n.items.filter(x=>x.unread),read=n.items.filter(x=>!x.unread);return '<section id="notification-panel" class="panel">'+scheduleNote+'<h2>🔔 '+(role==='営業'?'その他のお知らせ':'お知らせ')+' <span class="pill">新着 '+n.unread+'件</span></h2><p class="small">確認したお知らせは下の「確認済み」に移ります。メールの送信状況とは別です。</p>'+(!fresh.length?'<p class="progress-done">✓ '+(role==='営業'?'その他の未確認のお知らせ':'未確認のお知らせ')+'はありません。</p>':'')+fresh.map(notificationItem).join('')+(read.length?'<details><summary>✓ 確認済みのお知らせ '+read.length+'件</summary>'+read.map(notificationItem).join('')+'</details>':'')+'</section>';}
+function notificationPage(){const scheduleNote=role==='営業'?'<p class="small">担当案件の上棟日・第一出荷日の未確認の変更は、このページの上部で変更前→変更後を確認できます。下の一覧はその他のお知らせです。</p>':'';const n=pwaVisibleNotifications(data.notifications),fresh=n.items.filter(x=>x.unread),read=n.items.filter(x=>!x.unread);return '<section id="notification-panel" class="panel">'+scheduleNote+'<h2>🔔 '+(role==='営業'?'その他のお知らせ':'お知らせ')+' <span class="pill">新着 '+n.unread+'件</span></h2><p class="small">確認したお知らせは下の「確認済み」に移ります。メールの送信状況とは別です。</p>'+(!fresh.length?'<p class="progress-done">✓ '+(role==='営業'?'その他の未確認のお知らせ':'未確認のお知らせ')+'はありません。</p>':'')+fresh.map(notificationItem).join('')+(read.length?'<details><summary>✓ 確認済みのお知らせ '+read.length+'件</summary>'+read.map(notificationItem).join('')+'</details>':'')+'</section>';}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-plan-reviewed]');if(b)task(async()=>{await rpc('acknowledgeCompanionPlan',token,b.dataset.planReviewed,b.dataset.requestId);await load();message('✓ 予定を確認済みにしました。「本日確認した予定」に移しました');});});
 
 let companionView='pending';
@@ -819,7 +819,7 @@ function salesSchedulePage(){const plans=data.salesUpcomingPlans||[],groups=new 
 
 function caseActivityBadge(p){return p.activity?.unread?'<span class="case-update-dot" role="img" aria-label="未確認の変更あり" title="自分がまだ確認していない変更があります">● 変更あり</span>':'';}
 function caseActivityHint(p){const a=p.activity;if(!a?.latest)return '';return '<div class="case-latest"><span class="companion-state">'+escape(a.latest.title)+'</span><small>'+escape(a.latest.at)+' ／ '+escape(a.latest.by)+'</small>'+(a.latestConfirmation&&a.latestConfirmation.at!==a.latest.at?'<small>最終確認：'+escape(a.latestConfirmation.at)+' ／ '+escape(a.latestConfirmation.by)+'</small>':'')+'</div>';}
-function caseActivityPanel(p){const a=p.activity;if(!a)return '';const row=e=>'<li><strong>'+escape(e.title)+'</strong><br><small>'+escape(e.at)+' ／ '+escape(e.by)+(e.own?'（自分）':'')+'</small>'+(e.detail?'<p>'+escape(e.detail)+'</p>':'')+'</li>';return '<section class="panel case-activity-panel"><h3>🕒 確認・対応の履歴 '+caseActivityBadge(p)+'</h3><p class="small">確認・回答・予定登録・進捗更新の記録です。確認しただけでは作業完了にはしません。</p>'+(a.unread&&!data.adminPreview?'<button class="primary" data-case-activity-read="'+escape(p.id)+'">変更内容を確認しました</button>':'<p class="progress-done">✓ 現在、未確認の変更はありません。</p>')+'<ol class="case-activity-list">'+a.items.slice(0,5).map(row).join('')+'</ol>'+(a.items.length>5?'<details><summary>以前の履歴 '+(a.items.length-5)+'件</summary><ol class="case-activity-list">'+a.items.slice(5).map(row).join('')+'</ol></details>':'')+(!a.items.length?'<p>確認・対応の記録はまだありません。</p>':'')+'</section>';}
+function caseActivityPanel(p){const a=p.activity;if(!a)return '';const row=e=>'<li><strong>'+escape(e.title)+'</strong><br><small>'+escape(e.at)+' ／ '+escape(e.by)+(e.own?'（自分）':'')+'</small>'+(e.detail?'<p>'+escape(e.detail)+'</p>':'')+'</li>';const pending=pwaConfirmationSession().pending.has('history:'+p.id);return '<section class="panel case-activity-panel"'+(pending?' hidden':'')+'><h3>🕒 確認・対応の履歴 '+caseActivityBadge(p)+'</h3><p class="small">確認・回答・予定登録・進捗更新の記録です。確認しただけでは作業完了にはしません。</p>'+(a.unread&&!data.adminPreview?'<button class="primary" data-case-activity-read="'+escape(p.id)+'">変更内容を確認しました</button>':'<p class="progress-done">✓ 現在、未確認の変更はありません。</p>')+'<ol class="case-activity-list">'+a.items.slice(0,5).map(row).join('')+'</ol>'+(a.items.length>5?'<details><summary>以前の履歴 '+(a.items.length-5)+'件</summary><ol class="case-activity-list">'+a.items.slice(5).map(row).join('')+'</ol></details>':'')+(!a.items.length?'<p>確認・対応の記録はまだありません。</p>':'')+'</section>';}
 function questionNeedsAction(q){return role==='営業'?q[7]==='回答待ち':role==='CAD'?q[7]==='CAD確認待ち':q[7]!=='解決済';}
 function caseQuestionPage(ps){const ids=new Set(ps.map(p=>p.id)),all=data.questions.filter(q=>ids.has(q[1])),open=all.filter(questionNeedsAction),waiting=all.filter(q=>!questionNeedsAction(q)&&q[7]!=='解決済'),done=all.filter(q=>q[7]==='解決済');return '<section class="panel"><h2>確認依頼・回答</h2><h3>自分の対応待ち '+open.length+'件</h3>'+open.map(question).join('')+(!open.length?'<p class="progress-done">✓ 現在の対応待ちはありません。</p>':'')+(waiting.length?'<details><summary>相手の確認・回答待ち '+waiting.length+'件</summary>'+waiting.map(question).join('')+'</details>':'')+(done.length?'<details><summary>✓ 解決済み '+done.length+'件</summary>'+done.map(question).join('')+'</details>':'')+'</section>';}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-case-activity-read]');if(b)pwaConfirmCaseChanges(b);});
@@ -2184,10 +2184,24 @@ function pwaQueueConfirmation(work){
   pwaConfirmationQueue=next.catch(()=>{});
   return next;
 }
-function pwaConfirmationFeedback(button){
+function pwaVisibleScheduleItems(snapshot){
+  const items=snapshot?.items||[];
+  if(data?.adminPreview||previewSelection)return items;
+  const pending=schedulePriorityState().pending;
+  return pending.size?items.filter(x=>!pending.has(x.caseId+'|'+x.fingerprint)):items;
+}
+function pwaVisibleNotifications(snapshot){
+  if(!snapshot)return {unread:0,items:[]};
+  if(data?.adminPreview||previewSelection)return snapshot;
+  const pending=notificationReadState().pending;
+  if(!pending.size)return snapshot;
+  const items=snapshot.items.filter(item=>!item.unread||!pending.has(item.id));
+  return {...snapshot,items,unread:items.filter(item=>item.unread).length};
+}
+function pwaConfirmationFeedback(){
   const region=$('pwa-confirm-feedback'),expected=token,notice={};
   pwaConfirmationUi=notice;
-  button.classList.add('pwa-confirm-pressed');
+  region.hidden=true;
   const update=(text,mode)=>{
     if(token!==expected||pwaConfirmationUi!==notice)return;
     region.hidden=false;
@@ -2200,7 +2214,6 @@ function pwaConfirmationFeedback(button){
     region.append(mark,document.createTextNode(text));
     if(mode==='saved')setTimeout(()=>{if(pwaConfirmationUi===notice)region.hidden=true;},2000);
   };
-  update('受け付けました · 反映中','pending');
   return {
     saved:()=>update('確認済み','saved'),
     failed:()=>update('反映を確認できませんでした。再試行してください','failed'),
@@ -2217,21 +2230,32 @@ function pwaRunAcknowledgement(button,key,send,apply){
   const state=pwaConfirmationSession();
   if(state.pending.has(key))return;
   state.pending.add(key);
-  const cue=pwaConfirmationFeedback(button),label=button.textContent;
-  button.textContent='反映中…';button.disabled=true;button.setAttribute('aria-busy','true');
+  const cue=pwaConfirmationFeedback(),expectedView=pwaViewKey();
+  const dialog=button.closest('dialog');
+  if(dialog?.open)dialog.close();
+  else (button.closest('article, .case-activity-panel')||button).hidden=true;
+  let saved=false;
   pwaQueueConfirmation(async()=>{
     try{
       if(pwaDisplayScope()!==state.scope)return;
       const result=await send();
       if(pwaDisplayScope()!==state.scope)return;
       apply(result,state);
+      saved=true;
       cue.saved();
     }catch(error){
       if(pwaDisplayScope()===state.scope){cue.failed();message(error.message);}
     }finally{
       state.pending.delete(key);
-      if(pwaDisplayScope()===state.scope&&button.isConnected){
-        button.removeAttribute('aria-busy');button.disabled=false;button.textContent=label;
+      if(!saved&&pwaDisplayScope()===state.scope&&pwaViewKey()===expectedView){
+        // 再描画が入った場合も、今の画面の対象カードだけを戻す。
+        const selector=button.dataset.ack?'[data-ack]':'[data-case-activity-read]';
+        const id=button.dataset.ack||button.dataset.caseActivityRead;
+        document.querySelectorAll(selector).forEach(node=>{
+          if((node.dataset.ack||node.dataset.caseActivityRead)===id)
+            (node.closest('article, .case-activity-panel')||node).hidden=false;
+        });
+        if(dialog&&!dialog.open&&dialog.contains(button))dialog.showModal();
       }
     }
   });
@@ -2242,9 +2266,9 @@ function pwaConfirmDrawingReport(button){
     if(result!==true)throw Error('確認の保存結果を確認できませんでした');
     state.reports.set(id,data.user.name);
     pwaApplyConfirmedReports(data);
-    // 確認ボタンはその場で完了表示にし、ほかの入力欄を描画し直さない。
+    // このカードは閉じたままにし、案件を開き直したときに確認済みの記録を表示する。
     document.querySelectorAll('[data-ack]').forEach(node=>{
-      if(node.dataset.ack===id){const status=document.createElement('span');status.className='progress-done';status.textContent='✓ 確認済み';node.replaceWith(status);}
+      if(node.dataset.ack===id)node.closest('article').hidden=true;
     });
   });
 }
@@ -2252,14 +2276,12 @@ function pwaConfirmCaseChanges(button){
   const id=button.dataset.caseActivityRead,expected=token,
     project=data?.projects.find(p=>p.id===id),tokens=project?.activity?.unreadTokens||[];
   if(!tokens.length)return;
-  const dialog=button.closest('dialog');
   pwaRunAcknowledgement(button,'history:'+id,()=>rpc('markCaseActivityRead',expected,id,tokens),result=>{
     if(!result||!Array.isArray(result.unreadTokens))throw Error('確認の保存結果を確認できませんでした');
     const current=data.projects.find(p=>p.id===id);
     if(current)current.activity=result;
     project.activity=result;
-    if(dialog?.open&&dialog.contains(button))dialog.close();
-    if(button.isConnected&&button.closest('#content'))render();
+    if(result.unread)message('表示していた変更を確認しました。その後の新しい変更が残っています。');
   });
 }
 </script>

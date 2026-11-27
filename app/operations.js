@@ -294,10 +294,11 @@
     }
     const payload = { action: 'rpc', token: supplied, method, args: parameters };
     const write = !reads.has(method);
+    const showWriteStatus = !['markSchedulePriorityRead', 'markNotificationRead', 'acknowledgeReport', 'markCaseActivityRead'].includes(method);
     const key = write ? await requestKey(method, parameters) : null;
     if (write) {
       payload.requestId = requestId(key);
-      status('保存中…');
+      if (showWriteStatus) status('保存中…');
     } else if (method === 'getDashboard') {
       status(dashboardLoaded ? '前回の情報を表示中。最新情報を取得中…' : '最新情報を取得中…');
     }
@@ -306,13 +307,13 @@
       try { response = await call(payload); }
       catch (error) {
         if (!write || !['CONNECTION', 'RESULT_PENDING', 'BUSY'].includes(error.code)) throw error;
-        status('保存結果を確認中…');
+        if (showWriteStatus) status('保存結果を確認中…');
         await new Promise(resolve => setTimeout(resolve, 400));
         response = await call(payload);
       }
       if (write) {
         clearRequest(key);
-        status(response.value?.saved === true ? '保存しました。' : '処理結果を確認しました。');
+        if (showWriteStatus) status(response.value?.saved === true ? '保存しました。' : '処理結果を確認しました。');
       }
       if (method === 'getDashboard') { dashboardLoaded = true; status('最新情報を取得しました。'); }
       return response.value;
@@ -323,7 +324,7 @@
       }
       if (write) {
         if (['RESULT_CONFIRMED', 'READ_ONLY', 'INVALID', 'INVALID_REQUEST_ID'].includes(error.code)) clearRequest(key);
-        status(['RESULT_UNKNOWN', 'RESULT_PENDING', 'CONNECTION'].includes(error.code) ? '保存結果の確認が必要です。' : '保存要求の状態を確認してください。');
+        if (showWriteStatus) status(['RESULT_UNKNOWN', 'RESULT_PENDING', 'CONNECTION'].includes(error.code) ? '保存結果の確認が必要です。' : '保存要求の状態を確認してください。');
       } else if (method === 'getDashboard') status(dashboardLoaded ? '前回の情報を表示中。最新情報の取得に失敗しました。' : '最新情報の取得に失敗しました。');
       throw error;
     }
