@@ -690,7 +690,9 @@ async function confirmNotificationRead(button){
 }
 function updateNotificationBadge(){const count=pwaVisibleNotifications(data?.notifications).unread+(role==='営業'?pwaVisibleScheduleItems(data?.schedulePriority).length:0),node=$('notification-count');node.hidden=!count;node.textContent=count>99?'99+':String(count);$('notifications').setAttribute('aria-label','お知らせ 未読'+count+'件');}
 
-let notificationPolling=false;function startNotificationPolling(){if(notificationTimer)return;notificationTimer=setInterval(async()=>{if(!token||document.hidden||busy||notificationPolling||data?.adminPreview)return;notificationPolling=true;const currentToken=token,currentRole=role,prioritySequence=nextSchedulePriorityRead();try{const n=await rpc('getNotifications',currentToken);if(token!==currentToken||role!==currentRole||!data||data.adminPreview)return;data.schedulePriority=mergeSchedulePrioritySnapshot(n.schedulePriority,prioritySequence);data.notifications=mergeNotificationSnapshot(n);refreshNotificationPanel();refreshSchedulePriority();}catch(e){if(token===currentToken&&role===currentRole&&data&&!data.adminPreview){data.schedulePriority=mergeSchedulePrioritySnapshot({unavailable:true},prioritySequence);refreshSchedulePriority();}}finally{notificationPolling=false;}},60000);}
+function startNotificationPolling(){
+  if(!notificationTimer)notificationTimer=setInterval(()=>{if(!busy)pwaSyncNotifications();},60000);
+}
 $('past-toggle').onclick=()=>{showPast=!showPast;selected='';render();};
 $('notifications').onclick=()=>{tab='notifications';selected='';render();};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-notification-read]');if(b)void confirmNotificationRead(b);});
@@ -802,8 +804,8 @@ function factoryProgress(p){if(p.source!=='データ')return '—';const f=p.fac
 function companionPlanList(plans){if(!plans?.length)return '';const open=plans.filter(t=>!t.reviewed),done=plans.filter(t=>t.reviewed);const row=t=>'<article class="'+(t.reviewed?'reviewed-item':'')+'"><strong>'+escape(t.customer+' / '+t.site)+'</strong><p>'+escape(t.title)+'</p>'+(t.reviewed?'<p class="progress-done">✓ 予定確認済み（作業の完了とは別です）</p>':'<button data-plan-reviewed="'+escape(t.key)+'" data-request-id="'+escape(t.response.requestId)+'">予定を確認しました</button>')+' <button data-case="'+escape(t.caseId)+'">対応・登録へ</button></article>';return '<h3>🗓 今日の対応予定 '+open.length+'件</h3>'+open.map(row).join('')+(done.length?'<details><summary>✓ 本日確認した予定 '+done.length+'件</summary>'+done.map(row).join('')+'</details>':'');}
 function timberPanel(p){if(p.source!=='データ')return '';const state=p.provisionalTimber,editable=canCAD(p)&&!p.archived;return '<section class="panel"><h3>📋 仮木取表</h3><p>提出期限：<strong>'+escape(p.timberDue||p.timberDueNote||'日程確認が必要')+'</strong>（第一出荷日の5営業日前）</p><p>'+ (p.timberSubmitted?'<span class="progress-done">✓ 提出済 '+escape(state.date)+'</span>':p.timberScheduleChanged?'<span class="pill warn">出荷日変更・提出内容の再確認が必要</span>':'<span class="pill warn">'+escape(state?.status||'未提出・未登録')+'</span>')+'</p>'+(state?'<p class="small">'+escape(state.by)+' ／ '+escape(state.at)+(state.note?'<br>'+escape(state.note):'')+'</p>':'')+(editable?'<form data-timber="'+escape(p.id)+'"><input type="hidden" name="shipping" value="'+escape(p.shipping||'')+'"><label>仮木取表の状況<select name="status"><option '+(!p.timberSubmitted?'selected':'')+'>作成中</option><option '+(p.timberSubmitted?'selected':'')+'>提出済</option></select></label><label>提出日（提出済の場合）<input name="date" type="date" max="'+data.today+'" value="'+escape(p.timberSubmitted?state.date:data.today)+'"></label><label>共有メモ（任意）<input name="note" maxlength="300" value="'+escape(state?.note||'')+'"></label><button class="primary">仮木取表の状況を登録</button></form>':'')+'</section>';}
 function timberReminderHome(ps){if(!['CAD','管理者'].includes(role))return '';const items=ps.filter(p=>p.timberReminder).sort((a,b)=>(a.timberDue||'9999').localeCompare(b.timberDue||'9999')),done=ps.filter(p=>p.timberSubmitted&&!p.archived&&!inErectionBucket(p));const row=p=>'<article class="'+(p.timberSubmitted?'reviewed-item':p.timberDue&&p.timberDue<=data.today?'late':'warn')+'"><strong>'+escape(p.customer+' / '+p.site)+'</strong><p>CAD '+escape(p.cad)+' ／ 第一出荷日 '+escape(p.shipping||'未登録')+'<br>仮木取表の提出期限：<strong>'+escape(p.timberDue||p.timberDueNote)+'</strong></p>'+(p.timberSubmitted?'<p class="progress-done">✓ 提出済 '+escape(p.provisionalTimber.date)+'</p>':p.timberScheduleChanged?'<p>⚠ 出荷日変更・提出内容を再確認してください</p>':'<p>'+escape(p.provisionalTimber?.status||'未提出・未登録')+'</p>')+(role==='CAD'?'<button data-case="'+escape(p.id)+'">案件で確認・提出を登録</button>':'')+'</article>';const content='<section class="panel timber-reminders"><h2>📋 仮木取表の提出</h2><p>第一出荷日の1週間前＝<strong>5営業日前（土日・祝日を除く）</strong>までに提出します。</p><p>提出待ち <strong>'+items.length+'件</strong> ／ 本日期限・超過 '+items.filter(p=>p.timberDue&&p.timberDue<=data.today).length+'件</p>'+items.slice(0,3).map(row).join('')+(items.length>3?'<details><summary>ほかの提出待ち '+(items.length-3)+'件</summary>'+items.slice(3).map(row).join('')+'</details>':'')+(!items.length?'<p class="progress-done">✓ 現在の提出待ちはありません。</p>':'')+(done.length?'<details><summary>✓ 提出済み '+done.length+'件</summary>'+done.map(row).join('')+'</details>':'')+'</section>';return role==='CAD'?homeWorkOverview(content,'📋 仮木取表の提出待ち '+items.length+'件 ／ 本日・期限超過 '+items.filter(p=>p.timberDue&&p.timberDue<=data.today).length+'件',items.some(p=>p.timberDue&&p.timberDue<=data.today)):content;}
-function notificationItem(x){const pending=notificationReadState().pending.has(x.id);return '<article class="'+(x.unread?'notification-new':'reviewed-item')+'">'+(x.unread?'<span class="new-mark">新着</span>':'<span class="progress-done">✓ 確認済</span>')+'<h3>'+escape(x.subject)+'</h3><p class="small">'+escape(x.at)+' ／ '+(x.mailStatus==='アプリ内通知'?'アプリ内通知':'メール：'+escape(x.mailStatus))+'</p><p class="notification-body">'+escape(x.body)+'</p>'+(!x.unread&&x.readAt?'<p class="small">確認：'+escape(x.readAt)+' ／ '+escape(data.user.name)+'</p>':'')+(x.unread?'<button class="primary" data-notification-read="'+escape(x.id)+'"'+(pending?' disabled aria-busy="true"':'')+'>'+(pending?'保存中…':'確認しました')+'</button>':'')+((x.id?.startsWith('quote-intake:')||x.id?.startsWith('quote-admin-created:')||x.id?.startsWith('quote-cad-leader:'))&&x.caseId&&(x.id.startsWith('quote-cad-leader:')||data.projects?.some(p=>p.id===x.caseId))?'<button type="button" data-case="'+escape(x.caseId)+'">'+(x.id.startsWith('quote-cad-leader:')?'CAD担当を決める':x.id.startsWith('quote-admin-created:')?'登録された案件を開く':'依頼の案件を開く')+'</button>':'')+'</article>';}
-function notificationPage(){const scheduleNote=role==='営業'?'<p class="small">担当案件の上棟日・第一出荷日の未確認の変更は、このページの上部で変更前→変更後を確認できます。下の一覧はその他のお知らせです。</p>':'';const n=pwaVisibleNotifications(data.notifications),fresh=n.items.filter(x=>x.unread),read=n.items.filter(x=>!x.unread);return '<section id="notification-panel" class="panel">'+scheduleNote+'<h2>🔔 '+(role==='営業'?'その他のお知らせ':'お知らせ')+' <span class="pill">新着 '+n.unread+'件</span></h2><p class="small">確認したお知らせは下の「確認済み」に移ります。メールの送信状況とは別です。</p>'+(!fresh.length?'<p class="progress-done">✓ '+(role==='営業'?'その他の未確認のお知らせ':'未確認のお知らせ')+'はありません。</p>':'')+fresh.map(notificationItem).join('')+(read.length?'<details><summary>✓ 確認済みのお知らせ '+read.length+'件</summary>'+read.map(notificationItem).join('')+'</details>':'')+'</section>';}
+function notificationItem(x){const pending=notificationReadState().pending.has(x.id);return '<article class="'+(x.unread?'notification-new':'reviewed-item')+'">'+(x.unread?'<span class="new-mark">新着</span>':'<span class="progress-done">✓ 確認済</span>')+'<h3>'+escape(x.subject)+'</h3><p class="small">'+escape(x.at)+' ／ '+(x.mailStatus==='アプリ内通知'?'アプリ内通知':'メール：'+escape(x.mailStatus))+'</p><p class="notification-body">'+escape(x.body)+'</p>'+(!x.unread&&x.readAt?'<p class="small">確認：'+escape(x.readAt)+' ／ '+escape(data.user.name)+'</p>':'')+(x.unread?'<button class="primary" data-notification-read="'+escape(x.id)+'"'+(pending?' disabled aria-busy="true"':'')+'>'+(pending?'保存中…':'確認しました')+'</button>':'')+((x.id?.startsWith('quote-intake:')||x.id?.startsWith('quote-admin-created:')||x.id?.startsWith('quote-cad-leader:'))&&x.caseId&&(x.id.startsWith('quote-cad-leader:')||(data.notifications?.openableCaseIds?.includes(x.caseId)??data.projects?.some(p=>p.id===x.caseId)))?'<button type="button" data-case="'+escape(x.caseId)+'">'+(x.id.startsWith('quote-cad-leader:')?'CAD担当を決める':x.id.startsWith('quote-admin-created:')?'登録された案件を開く':'依頼の案件を開く')+'</button>':'')+'</article>';}
+function notificationPage(){const state=pwaNotificationPageState();const scheduleNote=role==='営業'?'<p class="small">担当案件の上棟日・第一出荷日の未確認の変更は、このページの上部で変更前→変更後を確認できます。下の一覧はその他のお知らせです。</p>':'';const n=pwaVisibleNotifications(data.notifications),fresh=n.items.filter(x=>x.unread),read=n.items.filter(x=>!x.unread);return '<section id="notification-panel" class="panel">'+scheduleNote+'<h2>🔔 '+(role==='営業'?'その他のお知らせ':'お知らせ')+(state?'':' <span class="pill">新着 '+n.unread+'件</span>')+'</h2>'+state+(state?'':('<p class="small">確認したお知らせは下の「確認済み」に移ります。メールの送信状況とは別です。</p>'+(!fresh.length?'<p class="progress-done">✓ '+(role==='営業'?'その他の未確認のお知らせ':'未確認のお知らせ')+'はありません。</p>':'')+fresh.map(notificationItem).join('')+(read.length?'<details><summary>✓ 確認済みのお知らせ '+read.length+'件</summary>'+read.map(notificationItem).join('')+'</details>':'')))+'</section>';}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-plan-reviewed]');if(b)task(async()=>{await rpc('acknowledgeCompanionPlan',token,b.dataset.planReviewed,b.dataset.requestId);await load();message('✓ 予定を確認済みにしました。「本日確認した予定」に移しました');});});
 
 let companionView='pending';
@@ -2289,6 +2291,7 @@ function pwaConfirmCaseChanges(button){
 <script>
 let pwaLoadedView=null,pwaPendingView=null,pwaDashboardRead=0,pwaDetailAnchor=null;
 let pwaLists=null,pwaListOpenPending=false,pwaListAutoAt=0,pwaListAutoRead=null,pwaListRefresh=null;
+let pwaNotificationFeed=null;
 const pwaViewLabels={
   home:'ホーム',overview:'業務サマリー',cases:'案件一覧',detail:'案件詳細',quotes:'見積用',
   questions:'確認依頼',schedule:'営業予定','cad-team':'CADチーム','cad-monthly':'CAD月間実績',
@@ -2324,6 +2327,12 @@ async function pwaReadDashboard(view, expectedToken){
 function pwaAcceptDashboard(snapshot,view,daily,started,lists){
   const scope=pwaDisplayScope(snapshot.activeRole);
   const previous=pwaLoadedView?.scope===scope?data:null;
+  if(snapshot.notifications){
+    const feed=pwaNotificationState(scope);
+    feed.ready=true;
+    feed.error=false;
+    feed.pending=null;
+  }
   if(lists){
     pwaListAutoAt=Date.now();
     pwaStorePreparedLists(lists,scope);
@@ -2371,6 +2380,16 @@ function pwaViewStatus(view,error){
 function pwaEnsureDashboardView(){
   if(window.aiboOperations.productionRead||!data||!token)return true;
   const view=pwaTargetView(),key=pwaViewKey(view);
+  if(pwaLoadedView?.scope===pwaDisplayScope()){
+    const feed=pwaNotificationState();
+    if(!feed.ready&&!feed.error)pwaSyncNotifications();
+    if(view.name==='notifications'){
+      $('content').dataset.pwaView='notifications';
+      $('content').dataset.pwaViewMs='0';
+      $('content').removeAttribute('aria-busy');
+      return true;
+    }
+  }
   if(pwaLoadedView?.key===key){
     $('content').removeAttribute('aria-busy');
     return true;
@@ -2387,6 +2406,52 @@ function pwaEnsureDashboardView(){
   });
   return false;
 }
+function pwaNotificationState(scope=pwaDisplayScope()){
+  if(pwaNotificationFeed?.scope!==scope)
+    pwaNotificationFeed={scope,ready:false,error:false,pending:null};
+  return pwaNotificationFeed;
+}
+function pwaSyncNotifications(){
+  const scope=pwaDisplayScope();
+  if(!token||!data||document.hidden||previewSelection||data.adminPreview||pwaLoadedView?.scope!==scope)return;
+  const feed=pwaNotificationState(scope);
+  if(feed.pending)return feed.pending;
+  feed.error=false;
+  const prioritySequence=nextSchedulePriorityRead();
+  const pending=rpc('getNotifications',token);
+  feed.pending=pending;
+  const current=()=>pwaNotificationFeed===feed&&pwaDisplayScope()===scope&&feed.pending===pending;
+  pending.then(snapshot=>{
+    if(!current())return;
+    feed.ready=true;
+    data.notifications=mergeNotificationSnapshot(snapshot);
+    data.schedulePriority=mergeSchedulePrioritySnapshot(snapshot.schedulePriority,prioritySequence);
+    if(!selected||tab!=='notifications')refreshNotificationPanel();
+    refreshSchedulePriority();
+  }).catch(()=>{
+    if(!current())return;
+    feed.error=true;
+    if(!selected||tab!=='notifications')refreshNotificationPanel();
+  }).finally(()=>{if(feed.pending===pending)feed.pending=null;});
+  return pending;
+}
+function pwaNotificationPageState(){
+  if(window.aiboOperations.productionRead||data.adminPreview)return '';
+  const feed=pwaNotificationState();
+  if(feed.ready)return '';
+  if(feed.error)return '<p role="alert">お知らせを取得できませんでした。</p><button type="button" id="pwa-retry-notifications">再取得</button>';
+  return '<span class="pwa-notifications-sync" role="status">お知らせを同期中です</span>';
+}
+document.addEventListener('click',event=>{
+  if(event.target.closest('#pwa-retry-notifications')){
+    pwaSyncNotifications();
+    refreshNotificationPanel();
+  }
+});
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&pwaNotificationFeed&&!pwaNotificationFeed.ready&&!pwaNotificationFeed.error)
+    pwaSyncNotifications();
+});
 function pwaStorePreparedLists(lists,scope){
   if(pwaLists?.scope!==scope)pwaLists={scope};
   for(const view of ['home','cases']){
@@ -2458,6 +2523,7 @@ function pwaReadPreparedQuietly(){
 }
 function pwaClearPreparedLists(){
   pwaLists=null;pwaListOpenPending=false;pwaListAutoRead=null;pwaListAutoAt=0;pwaListRefresh=null;
+  pwaNotificationFeed=null;
   pwaClearConfirmationSession();
 }
 setInterval(pwaReadPreparedQuietly,60000);
